@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from pandas.core.arrays import categorical
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
+
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from typing import Union
 
@@ -330,9 +330,10 @@ def data_preparation(data, target, sample=None, test_size=0.3, categorical_colum
     categorical_columns.remove('empenho_numero_do_processo')
     numerical_columns.append('empenhos_por_processo')
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        data, target, test_size=test_size, random_state=15, stratify=target)
+    return data, categorical_columns, numerical_columns
 
+
+def encode_train_test(X_train, X_test, numerical_columns, categorical_columns, text_columns, tfidf=True):
     X_train = X_train.reset_index(drop=True)
     X_test = X_test.reset_index(drop=True)
 
@@ -346,4 +347,4 @@ def data_preparation(data, target, sample=None, test_size=0.3, categorical_colum
         X_train, tfvs = generate_fit_tfidf(X_train, text_columns)
         X_test = generate_tfidf(X_test, text_columns, tfvs)
 
-    return X_train, y_train, X_test, y_test
+    return X_train, X_test
