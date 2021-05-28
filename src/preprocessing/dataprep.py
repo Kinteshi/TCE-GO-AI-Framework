@@ -153,8 +153,10 @@ def generate_fit_ohe(X_train, columns):
     for col_name in columns:
         ohe = OneHotEncoder(handle_unknown='ignore')
         enc = ohe.fit_transform(X_train[col_name].values.reshape(-1, 1))
-        enc = pd.DataFrame(enc.toarray(), columns=ohe.get_feature_names(
-            input_features=(col_name,)))
+        # enc = pd.DataFrame(enc.toarray(), columns=ohe.get_feature_names(
+        #     input_features=(col_name,)))
+        enc = pd.DataFrame.sparse.from_spmatrix(
+            enc, columns=ohe.get_feature_names(input_features=(col_name,)))
         X_train.drop([col_name], inplace=True, axis='columns')
         X_train = X_train.join(enc)
         ohe_dict[col_name] = copy.deepcopy(ohe)
@@ -166,8 +168,10 @@ def generate_ohe(X_test, columns, ohe_dict):
     for col_name in columns:
         ohe = ohe_dict[col_name]
         enc = ohe.transform(X_test[col_name].values.reshape(-1, 1))
-        enc = pd.DataFrame(enc.toarray(), columns=ohe.get_feature_names(
-            input_features=(col_name,)))
+        enc = pd.DataFrame.sparse.from_spmatrix(
+            enc, columns=ohe.get_feature_names(input_features=(col_name,)))
+        # enc = pd.DataFrame(enc.toarray(), columns=ohe.get_feature_names(
+        #     input_features=(col_name,)))
         X_test.drop([col_name], inplace=True, axis='columns')
         X_test = X_test.join(enc)
     return X_test
@@ -182,7 +186,8 @@ def generate_fit_tfidf(X_train, columns):
         tfidf = tfv.fit_transform(X_train[col_name])
         columns_names = ['Tfidf_' +
                          word for word in tfv.get_feature_names()]
-        tfidf = pd.DataFrame(tfidf.toarray(), columns=columns_names)
+        tfidf = pd.DataFrame.sparse.from_spmatrix(tfidf, columns=columns_names)
+        # tfidf = pd.DataFrame(tfidf.toarray(), columns=columns_names)
         X_train.drop([col_name], inplace=True, axis='columns')
         X_train = X_train.join(tfidf)
         tfv_dict[col_name] = copy.deepcopy(tfv)
@@ -199,7 +204,8 @@ def generate_tfidf(X_test, columns, tfv_dict):
         tfidf = tfv.transform(X_test[col_name])
         columns_names = ['Tfidf_' +
                          word for word in tfv.get_feature_names()]
-        tfidf = pd.DataFrame(tfidf.toarray(), columns=columns_names)
+        # tfidf = pd.DataFrame(tfidf.toarray(), columns=columns_names)
+        tfidf = pd.DataFrame.sparse.from_spmatrix(tfidf, columns=columns_names)
         X_test.drop([col_name], inplace=True, axis='columns')
         X_test = X_test.join(tfidf)
     return X_test
