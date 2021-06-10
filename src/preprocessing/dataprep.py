@@ -3,6 +3,7 @@ import nltk
 import numpy as np
 import pandas as pd
 from cleantext import clean
+from datetime import datetime
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from pandas.core.arrays import categorical
@@ -13,6 +14,7 @@ from typing import Union
 
 from preprocessing.text import fixColumnName
 from preprocessing.classification import tratarLabel
+import string
 
 global_categorical_columns = [
     # 'exercicio_do_orcamento_ano',
@@ -84,6 +86,14 @@ def remove_stopwords(input_text, stopwords_list):
 
 
 def text_preprocessing(input_text):
+    
+    def remove_punctuation(input_text):
+        # Make translation table
+        punct = string.punctuation
+        trantab = str.maketrans(punct, len(punct)*' ')  # Every punctuation symbol will be replaced by a space
+        return input_text.translate(trantab)
+    
+    input_text = remove_punctuation(input_text)
 
     text = clean(
         input_text,
@@ -107,8 +117,8 @@ def text_preprocessing(input_text):
         replace_with_phone_number="telefone",
         replace_with_number="",
         replace_with_digit="",
-        replace_with_currency_symbol="BRL",
-        replace_with_punct=" ",
+        replace_with_currency_symbol="",
+        replace_with_punct="",
         lang="pt",
     )
 
@@ -133,8 +143,8 @@ def generate_fit_scaler(X_train, columns):
     scaler_dict = {}
     for col_name in columns:
         scaler = MinMaxScaler()
-        X_train[col_name] = scaler.fit_transform(
-            X_train[col_name].values.reshape(-1, 1))
+        X_train[col_name].update(scaler.fit_transform(
+            X_train[col_name].values.reshape(-1, 1)).flatten())
         scaler_dict[col_name] = copy.deepcopy(scaler)
         del scaler
     return X_train, scaler_dict
@@ -143,8 +153,8 @@ def generate_fit_scaler(X_train, columns):
 def generate_scaler(X_test, columns, scaler_dict):
     for col_name in columns:
         scaler = scaler_dict[col_name]
-        X_test[col_name] = scaler.transform(
-            X_test[col_name].values.reshape(-1, 1))
+        X_test[col_name].update(scaler.transform(
+            X_test[col_name].values.reshape(-1, 1)).flatten())
     return X_test
 
 
@@ -153,8 +163,6 @@ def generate_fit_ohe(X_train, columns):
     for col_name in columns:
         ohe = OneHotEncoder(handle_unknown='ignore')
         enc = ohe.fit_transform(X_train[col_name].values.reshape(-1, 1))
-        # enc = pd.DataFrame(enc.toarray(), columns=ohe.get_feature_names(
-        #     input_features=(col_name,)))
         enc = pd.DataFrame.sparse.from_spmatrix(
             enc, columns=ohe.get_feature_names(input_features=(col_name,)))
         X_train.drop([col_name], inplace=True, axis='columns')
@@ -170,8 +178,6 @@ def generate_ohe(X_test, columns, ohe_dict):
         enc = ohe.transform(X_test[col_name].values.reshape(-1, 1))
         enc = pd.DataFrame.sparse.from_spmatrix(
             enc, columns=ohe.get_feature_names(input_features=(col_name,)))
-        # enc = pd.DataFrame(enc.toarray(), columns=ohe.get_feature_names(
-        #     input_features=(col_name,)))
         X_test.drop([col_name], inplace=True, axis='columns')
         X_test = X_test.join(enc)
     return X_test
@@ -180,14 +186,13 @@ def generate_ohe(X_test, columns, ohe_dict):
 def generate_fit_tfidf(X_train, columns):
     tfv_dict = {}
     for col_name in columns:
-        X_train[col_name] = X_train[col_name].map(
-            text_preprocessing)
+        X_train[col_name].update(X_train[col_name].map(
+            text_preprocessing))
         tfv = TfidfVectorizer()
         tfidf = tfv.fit_transform(X_train[col_name])
         columns_names = ['Tfidf_' +
                          word for word in tfv.get_feature_names()]
         tfidf = pd.DataFrame.sparse.from_spmatrix(tfidf, columns=columns_names)
-        # tfidf = pd.DataFrame(tfidf.toarray(), columns=columns_names)
         X_train.drop([col_name], inplace=True, axis='columns')
         X_train = X_train.join(tfidf)
         tfv_dict[col_name] = copy.deepcopy(tfv)
@@ -198,13 +203,12 @@ def generate_fit_tfidf(X_train, columns):
 def generate_tfidf(X_test, columns, tfv_dict):
 
     for col_name in columns:
-        X_test[col_name] = X_test[col_name].map(
-            text_preprocessing)
+        X_test[col_name].update(X_test[col_name].map(
+            text_preprocessing))
         tfv = tfv_dict[col_name]
         tfidf = tfv.transform(X_test[col_name])
         columns_names = ['Tfidf_' +
                          word for word in tfv.get_feature_names()]
-        # tfidf = pd.DataFrame(tfidf.toarray(), columns=columns_names)
         tfidf = pd.DataFrame.sparse.from_spmatrix(tfidf, columns=columns_names)
         X_test.drop([col_name], inplace=True, axis='columns')
         X_test = X_test.join(tfidf)
@@ -262,21 +266,22 @@ def filter_tce_data(data, path_to_vigencie_encerrada):
     return data, target
 
 
-def data_preparation(data, target, sample=None, test_size=0.3, categorical_columns=None, numerical_columns=None, text_columns=None, tfidf=True):
-    # data.columns = [fixColumnName(c) for c in data.columns]
+def excel_to_month(excel_date):
+    date = datetime.fromordinal(
+        datetime(1900, 1, 1).toordinal() +
+        excel_date -
+        2)
+    return date.month
 
-    if sample:
-        data = data.sample(sample,)
+
+def data_preparation(data: pd.DataFrame, target, test_size=0.3, categorical_columns=None, numerical_columns=None, text_columns=None, tfidf=True):
 
     data = data.reset_index(drop=True)
-
-    # Seleção dos atributos
-    # target = data['valor_saldo_do_empenho']
-    # data.drop(['valor_saldo_do_empenho'], axis='columns', inplace=True)
-    # numerical_columns.remove('valor_saldo_do_empenho')
-
-    #
     # Criação de meta-atributos e tratamento comum para todos os dados
+
+    # Criação do meta-atributo mês
+    if 'periodo' in categorical_columns:
+        data['periodo'].update(data['periodo'].map(excel_to_month))
 
     # Criação do meta-atributo "Pessoa Jurídica?"
     pessoa_juridica = np.array(
@@ -322,26 +327,63 @@ def data_preparation(data, target, sample=None, test_size=0.3, categorical_colum
     categorical_columns.append('acao_programa')
     del acao_programa
 
-    # Codigo que mostra a quantidade de empenhos por processo
-    quantidade_empenhos_processo = data['empenho_numero_do_processo'].value_counts(
-    )
-    quantidade_empenhos_processo = quantidade_empenhos_processo.to_dict()
-    empenhos_processo = np.zeros(data.shape[0])
-    for i in range(data.shape[0]):
-        empenhos_processo[i] = quantidade_empenhos_processo[data['empenho_numero_do_processo'].iloc[i]]
-    data['empenhos_por_processo'] = empenhos_processo
-    del empenhos_processo
-    del quantidade_empenhos_processo
-    data.drop('empenho_numero_do_processo', axis='columns', inplace=True)
-    categorical_columns.remove('empenho_numero_do_processo')
-    numerical_columns.append('empenhos_por_processo')
+    # # Codigo que mostra a quantidade de empenhos por processo
+    # quantidade_empenhos_processo = data['empenho_numero_do_processo'].value_counts(
+    # )
+    # quantidade_empenhos_processo = quantidade_empenhos_processo.to_dict()
+    # empenhos_processo = np.zeros(data.shape[0])
+    # for i in range(data.shape[0]):
+    #     empenhos_processo[i] = quantidade_empenhos_processo[data['empenho_numero_do_processo'].iloc[i]]
+    # data['empenhos_por_processo'] = empenhos_processo
+    # del empenhos_processo
+    # del quantidade_empenhos_processo
+    # data.drop('empenho_numero_do_processo', axis='columns', inplace=True)
+    # categorical_columns.remove('empenho_numero_do_processo')
+    # numerical_columns.append('empenhos_por_processo')
 
     return data, categorical_columns, numerical_columns
+
+
+def generate_fit_process_count(data):
+    process_count = data['empenho_numero_do_processo'].value_counts()
+    process_count = process_count.to_dict()
+
+    empenhos_processo = np.zeros(data.shape[0])
+
+    for i in range(data.shape[0]):
+        empenhos_processo[i] = process_count[data['empenho_numero_do_processo'].iloc[i]]
+    data['empenhos_por_processo'] = empenhos_processo
+    data.drop('empenho_numero_do_processo', axis='columns', inplace=True)
+
+    return data, process_count
+
+
+def generate_process_count(data, process_count):
+
+    empenhos_processo = np.zeros(data.shape[0])
+
+    for i in range(data.shape[0]):
+        key = data['empenho_numero_do_processo'].iloc[i]
+        if key in process_count:
+            empenhos_processo[i] = process_count[key]
+        else:
+            empenhos_processo[i] = 0
+    data['empenhos_por_processo'] = empenhos_processo
+
+    data.drop('empenho_numero_do_processo', axis='columns', inplace=True)
+
+    return data
 
 
 def encode_train_test(X_train, X_test, numerical_columns, categorical_columns, text_columns, tfidf=True):
     X_train = X_train.reset_index(drop=True)
     X_test = X_test.reset_index(drop=True)
+
+    if 'empenho_numero_do_processo' in categorical_columns:
+        X_train, process_count = generate_fit_process_count(X_train)
+        X_test = generate_process_count(X_test, process_count)
+        categorical_columns.remove('empenho_numero_do_processo')
+        numerical_columns.append('empenhos_por_processo')
 
     X_train, scalers = generate_fit_scaler(X_train, numerical_columns)
     X_test = generate_scaler(X_test, numerical_columns, scalers)
