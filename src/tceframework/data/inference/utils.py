@@ -3,7 +3,7 @@ from pandas import DataFrame
 
 
 def initialize_inference_dict(data: DataFrame) -> DataFrame:
-
+    config.INFERENCE_DICT = {}
     for i in range(0, data.shape[0]):
         empenho = data.iloc[i, :]
         config.INFERENCE_DICT[empenho['empenho_sequencial_empenho']] = {
