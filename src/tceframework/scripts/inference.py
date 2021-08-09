@@ -8,6 +8,7 @@ from tceframework.data.text import regularize_columns_name
 from tceframework.dremio import construct_query, execute_query
 from tceframework.io import load_model, save_inference_results, save_json
 from datetime import datetime
+import gc
 
 warnings.filterwarnings('ignore')
 
@@ -30,6 +31,7 @@ def inference(filters: dict):
     model = load_model(filename='random_forest_model.pkl')
     y_pred_class = model.predict(X)
     del model, X
+    gc.collect()
 
     X = pp_second_tabular_inference(data.copy())
     model = load_model(filename='random_forest_ii_model.pkl')

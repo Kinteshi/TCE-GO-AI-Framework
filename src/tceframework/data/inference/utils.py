@@ -31,15 +31,15 @@ def resolve_result(y_true, y_pred, y_pred_correctness) -> str:
 
     if y_true == y_pred:
         if y_pred_correctness == 'INCORRETO':
-            return 'Inconclusivo por segundo modelo (INCV_M2)'
+            return 'INCV_M2'
         elif y_pred_correctness == 'OK':
-            return 'Correto em ambos os modelos (C_M1-M2)'
+            return 'C_M1-M2'
         elif y_pred_correctness == 'INCONCLUSIVO':
-            return 'Avaliação dúbia do segundo modelo (AD_M2)'
+            return 'AD_M2'
     else:
         if y_pred_correctness == 'INCORRETO':
-            return 'Incorreto em ambos os modelos (INCT_M1-M2)'
+            return 'INCT_M1-M2'
         elif y_pred_correctness == 'OK':
-            return 'Inconclusivo por primeiro modelo (INCV_M1)'
+            return 'INCV_M1'
         elif y_pred_correctness == 'INCONCLUSIVO':
-            return 'Inconclusivo por primeiro modelo e avaliação dúbia do segundo modelo (INCV_M1-AD_M2)'
+            return 'INCV_M1-AD_M2'

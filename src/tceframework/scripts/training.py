@@ -17,6 +17,7 @@ from tceframework.model.bert import NaturezaClassifier, fit_bert, get_prediction
 from tceframework.model.metrics import classification_report_csv, special_report_csv
 from sklearn.ensemble import RandomForestClassifier
 from torch.cuda import empty_cache
+import gc
 
 warnings.filterwarnings('ignore')
 
@@ -88,6 +89,7 @@ def train():
         train_data_loader=train_data_loader,
         test_data_loader=test_data_loader,)
     del bert_model, train_data_loader
+    gc.collect()
 
     # Load BERT model
     bert_model = NaturezaClassifier(n_classes)
@@ -95,10 +97,12 @@ def train():
     state_dict = load_torch_model(filename='bert_model.bin')
     bert_model.load_state_dict(state_dict)
     del state_dict, n_classes
+    gc.collect()
 
     # Bert Evaluation
     result = get_predictions(model=bert_model, data_loader=test_data_loader)
     del bert_model, test_data_loader
+    gc.collect()
 
     # classification_report_csv(result['real_values'], result['predictions'], True, 'bert_clf_rep.csv')
     special_report_csv(
@@ -112,9 +116,10 @@ def train():
 
     X_train, X_test, y_train, y_test = pp_tabular_training(data.copy())
     empty_cache()
+    gc.collect()
 
     model = RandomForestClassifier(
-        n_estimators=1500, random_state=15, n_jobs=-1)
+        n_estimators=700, random_state=15, n_jobs=-1)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
@@ -127,6 +132,7 @@ def train():
         filename='rf_sp_rep.csv')
     dump_model(model=model, filename='random_forest_model.pkl')
     del model, X_train, X_test, y_train, y_test, y_pred, data
+    gc.collect()
 
     # Modelo 2
     file = config.PARSER.get(
@@ -143,7 +149,7 @@ def train():
     X_train, X_test, y_train, y_test = pp_second_tabular_training(data.copy())
 
     model = RandomForestClassifier(
-        n_estimators=1000, random_state=15, n_jobs=-1)
+        n_estimators=400, random_state=15, n_jobs=-1)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
@@ -156,4 +162,4 @@ def train():
     #     filename='rf_sp_rep.csv')
     dump_model(model=model, filename='random_forest_ii_model.pkl')
 
-# change_root_dir_name('PRODUCTION/')
+    change_root_dir_name('PRODUCTION/')

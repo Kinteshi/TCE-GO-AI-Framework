@@ -19,24 +19,19 @@ def change_scope(targets: Iterable, status: str) -> None:
 
 def scope_filter(data: DataFrame):
     config.CLASS_DICT = load_scope_dict('scope.pkl')
-
-    # Filter out of scope dict -> Newly added classes - Unseen before
     mask = data.apply(blame, axis=1)
     data = data.loc[mask, :]
     data = data.reset_index(drop=True)
 
     return data
 
-    # lambda empenho: return config.CLASS_DICT[empenho['natureza_despesa_cod']]
-
 
 def blame(empenho):
-
     if empenho['natureza_despesa_cod'] not in config.CLASS_DICT:
         key = empenho['empenho_sequencial_empenho']
         config.INFERENCE_DICT[key]['Natureza Predita'] = 'Classe desconhecida'
         config.INFERENCE_DICT[key]['Corretude'] = 'Classe desconhecida'
-        config.INFERENCE_DICT[key]['Resultado'] = 'Classe desconhecida'
+        config.INFERENCE_DICT[key]['Resultado'] = 'INC'
         return False
     elif empenho['natureza_despesa_cod'] in config.CLASS_DICT:
         key = empenho['natureza_despesa_cod']
@@ -45,7 +40,7 @@ def blame(empenho):
             key = empenho['empenho_sequencial_empenho']
             config.INFERENCE_DICT[key]['Natureza Predita'] = info
             config.INFERENCE_DICT[key]['Corretude'] = info
-            config.INFERENCE_DICT[key]['Resultado'] = info
+            config.INFERENCE_DICT[key]['Resultado'] = 'INC'
             return False
         else:
             return True
@@ -54,7 +49,7 @@ def blame(empenho):
         info = 'Saldo zerado'
         config.INFERENCE_DICT[key]['Natureza Predita'] = info
         config.INFERENCE_DICT[key]['Corretude'] = info
-        config.INFERENCE_DICT[key]['Resultado'] = info
+        config.INFERENCE_DICT[key]['Resultado'] = 'INC'
         return False
 
 

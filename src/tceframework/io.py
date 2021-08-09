@@ -7,8 +7,7 @@ from pandas import DataFrame, read_csv, read_excel
 from torch import device, load, save
 import json
 import tceframework.config as config
-
-# from dask.dataframe import DataFrame
+import joblib
 
 
 def load_csv_data(path: str) -> DataFrame:
@@ -58,16 +57,18 @@ def load_torch_model(filename: str, ) -> Any:
 def dump_model(model: Any, filename: str) -> None:
     filename = config.MODEL_PATH + filename
     makedirs(dirname(filename), exist_ok=True)
-    with open(filename, 'wb') as file:
-        dill.dump(model, file)
-        file.close()
+    joblib.dump(model, filename, compress=3)
+    # with open(filename, 'wb') as file:
+    #     dill.dump(model, file)
+    #     file.close()
 
 
 def load_model(filename: str) -> Any:
     filename = config.MODEL_PATH + filename
-    with open(filename, 'rb') as file:
-        model = dill.load(file)
-        file.close()
+    model = joblib.load(filename)
+    # with open(filename, 'rb') as file:
+    #     model = dill.load(file)
+    #     file.close()
     return model
 
 
@@ -89,6 +90,7 @@ def save_scope_dict(filename):
     with open(filename, 'wb') as file:
         dill.dump(config.CLASS_DICT, file)
         file.close()
+    config.CLASS_DICT = None
 
 
 def load_scope_dict(filename):
