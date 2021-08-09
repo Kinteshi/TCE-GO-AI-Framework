@@ -68,7 +68,7 @@ def get_connection():
             'connection'),
         [
             config.PARSER.get(
-                'options.dremio'
+                'options.dremio',
                 'user'
             ),
             config.PARSER.get(
