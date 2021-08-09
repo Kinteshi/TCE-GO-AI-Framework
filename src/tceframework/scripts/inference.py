@@ -43,4 +43,4 @@ def inference(filters: dict):
     date = datetime.today().strftime('%d-%m-%Y')
 
     save_inference_results(f'{date}_results.csv')
-    save_json(filters, f'{date}_applied_filters.json')
+    # save_json(filters, f'{date}_applied_filters.json')

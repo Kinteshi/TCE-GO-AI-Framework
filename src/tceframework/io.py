@@ -102,7 +102,7 @@ def load_scope_dict(filename):
 
 
 def save_inference_results(filename):
-    result = DataFrame(config.INFERENCE_DICT)
+    result = DataFrame(config.INFERENCE_DICT).transpose()
     result.to_csv(filename)
 
 
