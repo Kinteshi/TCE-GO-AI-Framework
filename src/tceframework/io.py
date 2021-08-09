@@ -96,8 +96,9 @@ def save_scope_dict(filename):
 def load_scope_dict(filename):
     filename = config.MODEL_PATH + filename
     with open(filename, 'rb') as file:
-        config.CLASS_DICT = dill.load(file)
+        class_dict = dill.load(file)
         file.close()
+    return class_dict
 
 
 def save_inference_results(filename):

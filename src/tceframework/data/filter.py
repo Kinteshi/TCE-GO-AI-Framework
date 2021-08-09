@@ -42,15 +42,15 @@ def blame(empenho):
             config.INFERENCE_DICT[key]['Corretude'] = info
             config.INFERENCE_DICT[key]['Resultado'] = 'INC'
             return False
+        elif empenho['valor_saldo_do_empenho'] == 0:
+            key = empenho['empenho_sequencial_empenho']
+            info = 'Saldo zerado'
+            config.INFERENCE_DICT[key]['Natureza Predita'] = info
+            config.INFERENCE_DICT[key]['Corretude'] = info
+            config.INFERENCE_DICT[key]['Resultado'] = 'INC'
+            return False
         else:
             return True
-    elif empenho['valor_saldo_do_empenho'] == 0:
-        key = empenho['empenho_sequencial_empenho']
-        info = 'Saldo zerado'
-        config.INFERENCE_DICT[key]['Natureza Predita'] = info
-        config.INFERENCE_DICT[key]['Corretude'] = info
-        config.INFERENCE_DICT[key]['Resultado'] = 'INC'
-        return False
 
 
 def min_docs_class(data: DataFrame, column: str, threshold: int) -> DataFrame:
