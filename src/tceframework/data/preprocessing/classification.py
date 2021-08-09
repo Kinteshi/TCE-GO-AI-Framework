@@ -15,6 +15,7 @@ from torch.utils.data import dataloader
 from transformers import BertTokenizer
 import tceframework.config as config
 from tceframework.model.bert import get_representation, get_saved_model
+from dateutil.parser import parse
 
 
 def pp_bert_training(data: DataFrame) -> Union[Any, Any]:
@@ -130,11 +131,14 @@ def code_reaper(input_text):
     return input_text[7:]
 
 
-def excel_to_month(excel_date):
-    date = datetime.fromordinal(
-        datetime(1900, 1, 1).toordinal() +
-        excel_date -
-        2)
+def date_to_month(input_date):
+    if config.PARSER.get('options.training', 'dataset_path', fallback=None):
+        date = datetime.fromordinal(
+            datetime(1900, 1, 1).toordinal() +
+            input_date -
+            2)
+    else:
+        date = parse(input_date)
     return date.month
 
 
@@ -145,7 +149,7 @@ def data_preparation(data: DataFrame, categorical_columns, numerical_columns):
 
     # Criação do meta-atributo mês
     if 'periodo' in categorical_columns:
-        data['periodo'].update(data['periodo'].map(excel_to_month))
+        data['periodo'].update(data['periodo'].map(date_to_month))
 
     # Criação do meta-atributo "Pessoa Jurídica?"
     pessoa_juridica = array(
