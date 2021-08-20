@@ -132,7 +132,7 @@ def code_reaper(input_text):
 
 
 def date_to_month(input_date):
-    if config.PARSER.get('options.training', 'dataset_path', fallback=None):
+    if isinstance(input_date, int):
         date = datetime.fromordinal(
             datetime(1900, 1, 1).toordinal() +
             input_date -
