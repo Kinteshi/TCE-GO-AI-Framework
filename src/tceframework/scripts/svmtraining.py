@@ -79,7 +79,7 @@ def train():
     X_train, X_test, y_train, y_test = pp_svm_training(data.copy())
     model = SVC(kernel='linear', random_state=config.RANDOM_SEED)
     grid = {'C': [0.1, 1, 10, 50]}
-    gs = GridSearchCV(model, grid, n_jobs=-1, cv=3)
+    gs = GridSearchCV(model, grid, n_jobs=None, cv=3)
     gs.fit(X_train, y_train)
 
     model = SVC(C=gs.best_params_['C'], kernel='linear',
