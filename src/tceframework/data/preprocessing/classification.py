@@ -340,3 +340,49 @@ def pp_second_tabular_inference(data: DataFrame):
         prefix='cr')
 
     return X
+
+
+def pp_svm_training(data: DataFrame):
+
+    target = data.natureza_despesa_cod
+
+    data = data.loc[:, (*config.CLF_CAT,
+                        *config.CLF_TEXT,
+                        *config.CLF_NUM,)]
+
+    data, categorical_columns, numerical_columns = data_preparation(
+        data,
+        categorical_columns=config.CLF_CAT,
+        numerical_columns=config.CLF_NUM,)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        data, target, test_size=0.3, random_state=config.RANDOM_SEED, stratify=target)
+
+    X_train, X_test = encode_train_test(X_train,
+                                        X_test,
+                                        numerical_columns,
+                                        categorical_columns,
+                                        config.CLF_TEXT,
+                                        tfidf=True,
+                                        bert=False,
+                                        y_train=y_train,
+                                        y_test=y_test,
+                                        prefix='clf')
+
+    return X_train, X_test, y_train, y_test
+
+
+def pp_svm_inference(data):
+
+    target = data.natureza_despesa_cod
+    data = data.loc[:, (*config.CLF_CAT,
+                        *config.CLF_TEXT,
+                        *config.CLF_NUM,)]
+
+    data, categorical_columns, numerical_columns = data_preparation(
+        data, categorical_columns=config.CLF_CAT, numerical_columns=config.CLF_NUM,)
+
+    X = encode_inference(data, target, numerical_columns, categorical_columns,
+                         config.CLF_TEXT, tfidf=True, bert=False, prefix='clf')
+
+    return X

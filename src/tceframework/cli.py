@@ -3,6 +3,8 @@ import sys
 
 from dateutil.parser import parse
 
+from tceframework import config
+
 
 def parseb(date: str):
     return parse(date, dayfirst=True)
@@ -68,8 +70,18 @@ def main():
     args = parser.parse_args()
 
     if args.task == 'train':
-        from tceframework.scripts.training import train
-        train()
+        algorithm = config.PARSER.get(
+            'options.training',
+            'algorithm',
+            fallback='svm')
+        if algorithm == 'svm':
+            from tceframework.scripts.svmtraining import train
+            train()
+        elif algorithm == 'bert_rf':
+            from tceframework.scripts.training import train
+            train()
+        else:
+            print('Algoritmo não reconhecido')
         sys.exit(0)
 
     elif args.task == 'infer':
@@ -83,8 +95,17 @@ def main():
         if args.orgaos:
             filters['orgaos'] = args.orgaos
 
+        algorithm = config.PARSER.get(
+            'options.training',
+            'algorithm',
+            fallback='svm')
         # Chamar script de inferência
-        from tceframework.scripts.inference import inference
-        inference(filters)
-
+        if algorithm == 'svm':
+            from tceframework.scripts.inference import svm_inference
+            svm_inference(filters)
+        elif algorithm == 'bert_rf':
+            from tceframework.scripts.inference import inference
+            inference(filters)
+        else:
+            print('Algoritmo não reconhecido')
         sys.exit(0)
