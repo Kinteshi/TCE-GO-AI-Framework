@@ -2,9 +2,10 @@ import gc
 import warnings
 
 import tceframework.config as config
+from scipy.sparse import csr_matrix
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
 from tceframework.data.filter import (initialize_class_dict, min_docs_class,
                                       remove_class_92, remove_expired_classes,
                                       remove_zeroed_documents)
@@ -75,17 +76,16 @@ def train():
     # n_classes = get_n_classes(data, 'natureza_despesa_cod')
 
     # SVM Pipeline
-
     X_train, X_test, y_train, y_test = pp_svm_training(data.copy())
     model = SVC(kernel='linear', random_state=config.RANDOM_SEED)
     grid = {'C': [0.1, 1, 10, 50]}
-    gs = GridSearchCV(model, grid, n_jobs=None, cv=3)
-    gs.fit(X_train, y_train)
+    gs = GridSearchCV(model, grid, n_jobs=None, cv=3, verbose=10)
+    gs.fit(csr_matrix(X_train.values), y_train)
 
     model = SVC(C=gs.best_params_['C'], kernel='linear',
                 random_state=config.RANDOM_SEED)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    model.fit(csr_matrix(X_train.values), y_train)
+    y_pred = model.predict(csr_matrix(X_test.values))
 
     # classification_report_csv(y_test, y_pred, False, 'rf_clf_rep.csv')
     special_report_csv(
