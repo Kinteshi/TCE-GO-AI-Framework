@@ -4,10 +4,7 @@ import tceframework.config as config
 from tceframework.data.filter import (min_docs_class, remove_class_92,
                                       remove_expired_classes, initialize_class_dict,
                                       remove_zeroed_documents)
-from tceframework.data.preprocessing.classification import (get_n_classes,
-                                                            pp_bert_training, pp_second_tabular_training,
-                                                            pp_tabular_training)
-from tceframework.data.text import regularize_columns_name
+
 from tceframework.io import (change_root_dir_name, dump_model, load_csv_data,
                              load_encoder, load_excel_data, load_torch_model,
                              save_scope_dict,
@@ -22,6 +19,7 @@ import gc
 warnings.filterwarnings('ignore')
 
 
+@DeprecationWarning
 def train():
     config.CHANGE_ROOT_DIR('TRAINING')
 

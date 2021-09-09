@@ -1,6 +1,6 @@
 from os import makedirs, rename
 from os.path import dirname
-from typing import Any
+from typing import Any, Union
 
 import dill
 from pandas import DataFrame, read_csv, read_excel
@@ -8,6 +8,8 @@ from torch import device, load, save
 import json
 import tceframework.config as config
 import joblib
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 
 
 def load_csv_data(path: str) -> DataFrame:
@@ -63,7 +65,7 @@ def dump_model(model: Any, filename: str) -> None:
     #     file.close()
 
 
-def load_model(filename: str) -> Any:
+def load_model(filename: str) -> Union[SVC, RandomForestClassifier]:
     filename = config.MODEL_PATH + filename
     model = joblib.load(filename)
     # with open(filename, 'rb') as file:
@@ -84,13 +86,12 @@ def change_root_dir_name(directory_name):
     rename(config.ROOT_DIR, directory_name)
 
 
-def save_scope_dict(filename):
+def save_scope_dict(filename: str, scope_dict: dict[str, str]) -> None:
     filename = config.MODEL_PATH + filename
     makedirs(dirname(filename), exist_ok=True)
     with open(filename, 'wb') as file:
-        dill.dump(config.CLASS_DICT, file)
+        dill.dump(scope_dict, file)
         file.close()
-    config.CLASS_DICT = None
 
 
 def load_scope_dict(filename):
@@ -101,8 +102,8 @@ def load_scope_dict(filename):
     return class_dict
 
 
-def save_inference_results(filename):
-    result = DataFrame(config.INFERENCE_DICT).transpose()
+def save_inference_results(filename: str, inference_dict: dict) -> None:
+    result = DataFrame(inference_dict).transpose()
     result.to_csv(filename)
 
 

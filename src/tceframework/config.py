@@ -5,7 +5,7 @@ PARSER = ConfigParser()
 PARSER.read('config.ini')
 
 # Directiores
-ROOT_DIR = 'EXAMPLE/'
+ROOT_DIR = 'TCEGO_IA_DATA/'
 ENC_PATH = ROOT_DIR + 'bin/encoders/'
 MODEL_PATH = ROOT_DIR + 'bin/models/'
 STDOUT_REDIR_PATH = ROOT_DIR
@@ -138,8 +138,3 @@ def CHANGE_ROOT_DIR(root_dir: str) -> None:
     MODEL_PATH = ROOT_DIR + 'bin/models/'
     STDOUT_REDIR_PATH = ROOT_DIR
     META_PATH = ROOT_DIR + 'meta/'
-
-
-# GLOBAL VARIABLES TO HELP RUNTIME
-CLASS_DICT = None
-INFERENCE_DICT = None

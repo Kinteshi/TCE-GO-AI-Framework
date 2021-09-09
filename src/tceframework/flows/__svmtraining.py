@@ -1,12 +1,15 @@
 import gc
 import warnings
+from typing import Union
+
+from pandas.core.frame import DataFrame
 
 import tceframework.config as config
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, data
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
-from tceframework.data.filter import (initialize_class_dict, min_docs_class,
+from tceframework.data.filter import (change_scope, change_scope_dict, get_class92_mask, get_where_expired_class, get_where_under_threshold, get_where_zero_value, initialize_class_dict, create_scope_dict, masked_filter, min_docs_class,
                                       remove_class_92, remove_expired_classes,
                                       remove_zeroed_documents)
 from tceframework.data.preprocessing.classification import (
@@ -21,59 +24,78 @@ from tceframework.model.metrics import (classification_report_csv,
 warnings.filterwarnings('ignore')
 
 
-def train():
-    config.CHANGE_ROOT_DIR('TRAINING')
-
-    # Loading data files and filtering
-
-    file = config.PARSER.get(
+def get_dataset_path() -> Union[str, None]:
+    return config.PARSER.get(
         'options.training',
         'dataset_path',
         fallback=None)
-    if file:
-        data = load_csv_data(file)
-        del file
-    else:
-        data = get_train_data()
 
-    sample = config.PARSER.getint(
+
+def get_sampling_number() -> Union[int, None]:
+    return config.PARSER.getint(
         'options.training',
         'sample_dataset',
         fallback=None)
-    if sample:
-        data = data.sample(sample, random_state=config.RANDOM_SEED)
-        del sample
 
-    data = data.reset_index(drop=True)
-    data = regularize_columns_name(data)
 
-    initialize_class_dict(data)
-    data = remove_zeroed_documents(data)
-    data = remove_class_92(data)
-    expired_data = load_excel_data(path=config.PARSER.get(
+def get_expired_labels_path() -> str:
+    return config.PARSER.get(
         'options.training',
         'expired_class_path'
-    ))
-
-    expired_data = regularize_columns_name(expired_data)
-    data = remove_expired_classes(
-        data=data,
-        expired_data=expired_data
-    )
-    del expired_data
-    data = min_docs_class(
-        data=data,
-        column='natureza_despesa_cod',
-        threshold=config.PARSER.getint(
-            'options.training',
-            'min_documents_class',
-            fallback=2
-        )
     )
 
+
+def get_label_population_floor() -> int:
+    return config.PARSER.getint(
+        'options.training',
+        'min_documents_class',
+        fallback=2
+    )
+
+
+def dataframe_reset_index(dataframe: DataFrame) -> DataFrame:
+    return dataframe.reset_index(drop=True)
+
+
+def train():
+    config.CHANGE_ROOT_DIR('TRAINING')
+
+    if dataset_path := get_dataset_path():
+        data = load_csv_data(dataset_path)
+    else:
+        data = get_train_data()
+
+    if samples := get_sampling_number():
+        data = data.sample(samples, random_state=config.RANDOM_SEED)
+
+    data = dataframe_reset_index(data)
+    data = regularize_columns_name(data)
+
+    scope_dict = create_scope_dict(data)
+
+    zero_value_mask = get_where_zero_value(data)
+    data, _ = masked_filter(data, zero_value_mask)
+
+    class92_mask = get_class92_mask(data)
+    data, dropped_rows = masked_filter(data, class92_mask)
+    scope_dict = change_scope_dict(
+        scope_dict, dropped_rows['natureza_despesa_cod'], 'Classe 92')
+
+    expired_classes = load_excel_data(path=get_expired_labels_path())
+    expired_classes = regularize_columns_name(expired_classes)
+    expired_classes_mask = get_where_expired_class(data, expired_classes)
+    data, dropped_rows = masked_filter(data, expired_classes_mask)
+    scope_dict = change_scope_dict(
+        scope_dict, dropped_rows['natureza_despesa_cod'], 'Classe com vigência expirada')
+
+    threshold = get_label_population_floor()
+    under_threshold_mask = get_where_under_threshold(data, threshold)
+    data, dropped_rows = masked_filter(data, under_threshold_mask)
+
+    data = dataframe_reset_index(data)
+
+    # MUDAR SALVAMENTO DO DICT E ATUALIZAR O FLUXO
     save_scope_dict('scope.pkl')
-
-    # n_classes = get_n_classes(data, 'natureza_despesa_cod')
 
     # SVM Pipeline
     X_train, X_test, y_train, y_test = pp_svm_training(data.copy())
@@ -86,8 +108,6 @@ def train():
                 random_state=config.RANDOM_SEED)
     model.fit(csr_matrix(X_train.values), y_train)
     y_pred = model.predict(csr_matrix(X_test.values))
-
-    # classification_report_csv(y_test, y_pred, False, 'rf_clf_rep.csv')
     special_report_csv(
         y_true=y_test,
         y_pred=y_pred,
@@ -118,12 +138,7 @@ def train():
     y_pred = model.predict(X_test)
 
     classification_report_csv(y_test, y_pred, False, 'rfii_clf_rep.csv')
-    # special_report_csv(
-    #     y_true=y_test,
-    #     y_pred=y_pred,
-    #     data=data,
-    #     encoding=False,
-    #     filename='rf_sp_rep.csv')
+
     dump_model(model=model, filename='random_forest_ii_model.pkl')
 
     change_root_dir_name('PRODUCTION/')

@@ -1,4 +1,7 @@
-from typing import Iterable
+from functools import partial
+from typing import Iterable, Union
+
+from pandas.core import series
 
 import tceframework.config as config
 from numpy.lib.function_base import iterable
@@ -6,89 +9,62 @@ from pandas import DataFrame
 from tceframework.io import load_scope_dict
 
 
-def initialize_class_dict(data: DataFrame) -> None:
-    config.CLASS_DICT = {}
-    for target in data['natureza_despesa_cod'].unique():
-        config.CLASS_DICT[target] = 'Em escopo'
+def scope_filter(data: DataFrame, scope_dict: dict) -> tuple[DataFrame, DataFrame]:
+    mask = data.apply(partial(isinscope, scope_dict), axis=1)
+    oos = data.loc[~mask, :].reset_index(drop=True)
+    data = data.loc[mask, :].reset_index(drop=True)
+    return data, oos
 
 
-def change_scope(targets: Iterable, status: str) -> None:
-    for target in targets:
-        config.CLASS_DICT[target] = status
-
-
-def scope_filter(data: DataFrame):
-    config.CLASS_DICT = load_scope_dict('scope.pkl')
-    mask = data.apply(blame, axis=1)
-    data = data.loc[mask, :]
-    data = data.reset_index(drop=True)
-
-    return data
-
-
-def blame(empenho):
-    if empenho['natureza_despesa_cod'] not in config.CLASS_DICT:
-        key = empenho['empenho_sequencial_empenho']
-        config.INFERENCE_DICT[key]['Natureza Predita'] = 'Classe desconhecida'
-        config.INFERENCE_DICT[key]['Corretude'] = 'Classe desconhecida'
-        config.INFERENCE_DICT[key]['Resultado'] = 'INC'
+def isinscope(scope_dict: dict, empenho: series.Series) -> bool:
+    if empenho['natureza_despesa_cod'] not in scope_dict:
         return False
-    elif empenho['natureza_despesa_cod'] in config.CLASS_DICT:
+    elif empenho['natureza_despesa_cod'] in scope_dict:
         key = empenho['natureza_despesa_cod']
-        if config.CLASS_DICT[key] != 'Em escopo':
-            info = config.CLASS_DICT[key]
-            key = empenho['empenho_sequencial_empenho']
-            config.INFERENCE_DICT[key]['Natureza Predita'] = info
-            config.INFERENCE_DICT[key]['Corretude'] = info
-            config.INFERENCE_DICT[key]['Resultado'] = 'INC'
+        if scope_dict[key] != 'Em escopo':
             return False
         elif empenho['valor_saldo_do_empenho'] == 0:
-            key = empenho['empenho_sequencial_empenho']
-            info = 'Saldo zerado'
-            config.INFERENCE_DICT[key]['Natureza Predita'] = info
-            config.INFERENCE_DICT[key]['Corretude'] = info
-            config.INFERENCE_DICT[key]['Resultado'] = 'INC'
             return False
         else:
             return True
 
 
-def min_docs_class(data: DataFrame, column: str, threshold: int) -> DataFrame:
+def create_scope_dict(data: DataFrame) -> dict[str, str]:
+    scope_dict = {}
+    for target in data['natureza_despesa_cod'].unique():
+        scope_dict[target] = 'Em escopo'
+    return scope_dict
+
+
+def change_scope_dict(scope_dict: dict[str, str], target_keys: Iterable[str], scope_status: str) -> dict[str, str]:
+    for target_key in target_keys:
+        scope_dict[target_key] = scope_status
+    return scope_dict
+
+
+def masked_filter(data: DataFrame, mask: list[bool]) -> tuple[DataFrame, DataFrame]:
+    return data.loc[mask, :], data.loc[~mask, :]
+
+
+def where_class_92(data: DataFrame) -> list[bool]:
+    regex = r'\d[.]\d[.]\d\d[.]92[.]\d\d'
+    mask = ~data['natureza_despesa_cod'].str.fullmatch(regex)
+    return mask
+
+
+def where_zero_value(data: DataFrame) -> Iterable[bool]:
+    return data['valor_saldo_do_empenho'] > 0
+
+
+def where_expired_class(data: DataFrame, expired_classes: DataFrame) -> Iterable[bool]:
+    expired_classes = expired_classes['nat_despesa'].to_list()
+    mask = ~data['natureza_despesa_cod'].isin(expired_classes)
+    return mask
+
+
+def where_below_threshold(data: DataFrame, threshold: int) -> Iterable[bool]:
+    column = 'natureza_despesa_cod'
     counters = data[column].value_counts().to_frame()
     above_threshold = counters[counters[column] >= threshold].index.to_list()
     mask = data[column].isin(above_threshold)
-    change_scope(
-        data.loc[~mask, 'natureza_despesa_cod'],
-        f'Classe abaixo do requerimento de {threshold} documentos')
-    data = data.loc[mask, :]
-    data = data.reset_index(drop=True)
-    return data
-
-
-def remove_class_92(data: DataFrame) -> DataFrame:
-    regex = r'\d[.]\d[.]\d\d[.]92[.]\d\d'
-    mask = ~data['natureza_despesa_cod'].str.fullmatch(regex)
-    change_scope(
-        data.loc[~mask, 'natureza_despesa_cod'],
-        f'Classe 92')
-    data = data.loc[mask, :]
-    data = data.reset_index(drop=True)
-    return data
-
-
-def remove_expired_classes(data: DataFrame, expired_data: DataFrame) -> DataFrame:
-    expired_classes = expired_data['nat_despesa'].to_list()
-    mask = ~data['natureza_despesa_cod'].isin(expired_classes)
-    change_scope(
-        data.loc[~mask, 'natureza_despesa_cod'],
-        f'Classe fora de vigência')
-    data = data.loc[mask, :]
-    data = data.reset_index(drop=True)
-    return data
-
-
-def remove_zeroed_documents(data: DataFrame) -> DataFrame:
-    mask = data['valor_saldo_do_empenho'] > 0
-    data = data.loc[mask, :]
-    data = data.reset_index(drop=True)
-    return data
+    return mask

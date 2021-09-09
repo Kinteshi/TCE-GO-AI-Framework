@@ -215,7 +215,7 @@ def get_predictions(model: NaturezaClassifier, data_loader: DataLoader,) -> dict
 #     plt.savefig('Micro.png')
 
 
-def get_representation(model, data_loader) -> DataFrame:
+def generate_bert_representation(model, data_loader) -> DataFrame:
     model = model.to(config.BERT_DEVICE)
     model = model.eval()
     with torch.no_grad():
