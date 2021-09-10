@@ -62,13 +62,16 @@ def change_inference_dict(out_of_scope: DataFrame, scope_dict: dict, inference_d
 
 
 def inference_svm_natureza(data: DataFrame) -> list:
-    X = preprocessing_inference_natureza(data.copy(), 'tfidf')
-    model = load_model(filename='svm_natureza_above_model')
+    X = preprocessing_inference_natureza(data.copy(), 'tfidf', 'above')
+    model = load_model(filename='svm_natureza_above_model.pkl')
     y_proba_above = model.predict_proba(X)
     y_pred_above = model.predict(X)
-    model = load_model(filename='svm_natureza_below_model')
+
+    X = preprocessing_inference_natureza(data.copy(), 'tfidf', 'below')
+    model = load_model(filename='svm_natureza_below_model.pkl')
     y_proba_below = model.predict_proba(X)
     y_pred_below = model.predict(X)
+
     y_pred = [
         a if probA >= probB else b
         for a, b, probA, probB in
@@ -79,10 +82,10 @@ def inference_svm_natureza(data: DataFrame) -> list:
 
 def inference_rf_natureza(data: DataFrame) -> list:
     X = preprocessing_inference_natureza(data.copy(), 'tfidf')
-    model = load_model(filename='rf_natureza_above_model')
+    model = load_model(filename='rf_natureza_above_model.pkl')
     y_proba_above = model.predict_proba(X)
     y_pred_above = model.predict(X)
-    model = load_model(filename='rf_natureza_below_model')
+    model = load_model(filename='rf_natureza_below_model.pkl')
     y_proba_below = model.predict_proba(X)
     y_pred_below = model.predict(X)
     y_pred = [

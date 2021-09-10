@@ -156,7 +156,7 @@ def model_name(type: str, algorithm: str):
 
 def train_rf_natureza(data: DataFrame, section: str):
     X_train, X_test, y_train, y_test = preprocessing_training_natureza(
-        data.copy(), text_representation='tfidf')
+        data.copy(), 'tfidf', section)
 
     model = RandomForestClassifier(
         n_estimators=500, n_jobs=-1, random_state=config.RANDOM_SEED)
@@ -174,7 +174,7 @@ def train_rf_natureza(data: DataFrame, section: str):
 
 def train_svm_natureza(data: DataFrame, section: str):
     X_train, X_test, y_train, y_test = preprocessing_training_natureza(
-        data.copy(), text_representation='tfidf')
+        data.copy(), 'tfidf', section)
 
     model = SVC(kernel='linear', random_state=config.RANDOM_SEED)
     grid = {'C': [0.1, 1, 10, 50]}
