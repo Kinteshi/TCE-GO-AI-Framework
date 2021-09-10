@@ -14,7 +14,7 @@ from tceframework.preprocessing.text import clean_nlp
 from tceframework.preprocessing.transform import data_preparation
 
 
-def preprocessing_training_natureza(data: DataFrame, text_representation: str) -> tuple[
+def preprocessing_training_natureza(data: DataFrame, text_representation: str, section: str) -> tuple[
         DataFrame, DataFrame, Series, Series]:
     target = data.natureza_despesa_cod
 
@@ -41,13 +41,13 @@ def preprocessing_training_natureza(data: DataFrame, text_representation: str) -
                                         text_col,
                                         y_train=y_train,
                                         y_test=y_test,
-                                        prefix='clf',
+                                        prefix=f'nat_{section}',
                                         text_representation=text_representation)
 
     return X_train, X_test, y_train, y_test
 
 
-def preprocessing_inference_natureza(data: DataFrame, text_representation: str) -> DataFrame:
+def preprocessing_inference_natureza(data: DataFrame, text_representation: str, section: str) -> DataFrame:
     target = data.natureza_despesa_cod
     cat_col = config.CLF_CAT.copy()
     text_col = config.CLF_TEXT.copy()
@@ -61,7 +61,7 @@ def preprocessing_inference_natureza(data: DataFrame, text_representation: str) 
         data, categorical_columns=cat_col, numerical_columns=config.CLF_NUM, )
 
     X = encode_inference(data, target, numerical_columns, categorical_columns,
-                         config.CLF_TEXT, prefix='clf', text_representation=text_representation)
+                         config.CLF_TEXT, prefix=f'nat_{section}', text_representation=text_representation)
 
     return X
 
