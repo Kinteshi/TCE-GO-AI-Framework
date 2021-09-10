@@ -1,3 +1,4 @@
+from functools import partial
 import warnings
 from numpy import array
 
@@ -150,10 +151,10 @@ def inference_flow(filters: dict):
     inference_dict = change_inference_dict(
         out_of_scope, scope_dict, inference_dict)
 
-    if algorithm := get_algorithm() == 'svm':
-        inference_natureza = inference_svm_natureza
-    elif algorithm == 'rf':
-        inference_natureza = inference_rf_natureza
+    if get_algorithm() == 'svm':
+        inference_natureza = partial(inference_svm_natureza)
+    elif get_algorithm() == 'rf':
+        inference_natureza = partial(inference_rf_natureza)
 
     y_pred_natureza = inference_natureza(data.copy())
     y_pred_corretude = inference_corretude(data.copy())

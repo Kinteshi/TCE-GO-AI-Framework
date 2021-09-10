@@ -224,9 +224,9 @@ def train_flow():
 
     # BORDA DE TRANSIÇÃO ENTRE LIMPEZA E INÍCIO DO PREPROCESSAMENTO
 
-    if algorithm := get_algorithm() == 'svm':
+    if get_algorithm() == 'svm':
         train_natureza = partial(train_svm_natureza)
-    elif algorithm == 'rf':
+    elif get_algorithm() == 'rf':
         train_natureza = partial(train_rf_natureza)
 
     print('Iniciando treinamento do classificador de natureza de despesa')
