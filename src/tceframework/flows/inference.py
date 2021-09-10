@@ -62,7 +62,7 @@ def change_inference_dict(out_of_scope: DataFrame, scope_dict: dict, inference_d
 
 
 def inference_svm_natureza(data: DataFrame) -> list:
-    X = preprocessing_inference_natureza(data.copy())
+    X = preprocessing_inference_natureza(data.copy(), 'tfidf')
     model = load_model(filename='svm_natureza_above_model')
     y_proba_above = model.predict_proba(X)
     y_pred_above = model.predict(X)
@@ -78,7 +78,7 @@ def inference_svm_natureza(data: DataFrame) -> list:
 
 
 def inference_rf_natureza(data: DataFrame) -> list:
-    X = preprocessing_inference_natureza(data.copy())
+    X = preprocessing_inference_natureza(data.copy(), 'tfidf')
     model = load_model(filename='rf_natureza_above_model')
     y_proba_above = model.predict_proba(X)
     y_pred_above = model.predict(X)
