@@ -224,20 +224,20 @@ def train_flow():
 
     # BORDA DE TRANSIÇÃO ENTRE LIMPEZA E INÍCIO DO PREPROCESSAMENTO
 
-    if get_algorithm() == 'svm':
-        train = partial(train_svm_natureza)
-    elif get_algorithm() == 'rf':
-        train = partial(train_rf_natureza)
+    if algorithm := get_algorithm() == 'svm':
+        train_natureza = partial(train_svm_natureza)
+    elif algorithm == 'rf':
+        train_natureza = partial(train_rf_natureza)
 
     print('Iniciando treinamento do classificador de natureza de despesa')
     print('Treinamento do modelo de classes maiores')
     time_ref = time.time()
-    train(data_above.copy(), 'above')
+    train_natureza(data_above.copy(), 'above')
     print(
         f'Treinamento finalizado. Duração total: {(time.time() - time_ref)/60}')
     print('Treinamento do modelo de classes menores')
     time_ref = time.time()
-    train(data_below.copy(), 'below')
+    train_natureza(data_below.copy(), 'below')
     print(
         f'Treinamento finalizado. Duração total: {(time.time() - time_ref)/60}')
 

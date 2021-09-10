@@ -76,6 +76,22 @@ def inference_svm_natureza(data: DataFrame) -> list:
     return array(y_pred)
 
 
+def inference_rf_natureza(data: DataFrame) -> list:
+    X = preprocessing_inference_natureza(data.copy())
+    model = load_model(filename='rf_natureza_above_model')
+    y_proba_above = model.predict_proba(X)
+    y_pred_above = model.predict(X)
+    model = load_model(filename='rf_natureza_below_model')
+    y_proba_below = model.predict_proba(X)
+    y_pred_below = model.predict(X)
+    y_pred = [
+        a if probA >= probB else b
+        for a, b, probA, probB in
+        zip(y_pred_above, y_pred_below, y_proba_above, y_proba_below)
+    ]
+    return array(y_pred)
+
+
 def inference_corretude(data: DataFrame) -> array:
     X = preprocessing_inference_corretude(data.copy())
     model = load_model(filename='random_forest_ii_model.pkl')
@@ -113,7 +129,15 @@ def compute_output(data: DataFrame, inference_dict: dict, y_natureza: array, y_c
     return inference_dict
 
 
-def inference(filters: dict):
+def get_algorithm() -> str:
+    return config.PARSER.get(
+        'options.training',
+        'algorithm',
+        fallback='svm'
+    )
+
+
+def inference_flow(filters: dict):
     # Executing query
     data = query_dataset(filters)
     data = data.reset_index(drop=True)
@@ -126,7 +150,12 @@ def inference(filters: dict):
     inference_dict = change_inference_dict(
         out_of_scope, scope_dict, inference_dict)
 
-    y_pred_natureza = inference_svm_natureza(data.copy())
+    if algorithm := get_algorithm() == 'svm':
+        inference_natureza = inference_svm_natureza
+    elif algorithm == 'rf':
+        inference_natureza = inference_rf_natureza
+
+    y_pred_natureza = inference_natureza(data.copy())
     y_pred_corretude = inference_corretude(data.copy())
 
     inference_dict = compute_output(

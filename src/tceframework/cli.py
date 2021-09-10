@@ -100,6 +100,6 @@ def main():
         #     'algorithm',
         #     fallback='svm')
         # Chamar script de inferência
-        from tceframework.flows.inference import inference
-        inference(filters)
+        from tceframework.flows.inference import inference_flow
+        inference_flow(filters)
         sys.exit(0)
