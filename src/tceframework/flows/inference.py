@@ -92,7 +92,7 @@ def inference_rf_natureza(data: DataFrame) -> list:
     y_pred_below = model.predict(X)
 
     y_pred = [
-        a if probA >= probB else b
+        a if probA.max() >= probB.max() else b
         for a, b, probA, probB in
         zip(y_pred_above, y_pred_below, y_proba_above, y_proba_below)
     ]
@@ -101,7 +101,7 @@ def inference_rf_natureza(data: DataFrame) -> list:
 
 def inference_corretude(data: DataFrame) -> array:
     X = preprocessing_inference_corretude(data.copy())
-    model = load_model(filename='random_forest_ii_model.pkl')
+    model = load_model(filename='rf_corretude_model.pkl')
     y_pred_corretude = model.predict(X)
     return y_pred_corretude
 

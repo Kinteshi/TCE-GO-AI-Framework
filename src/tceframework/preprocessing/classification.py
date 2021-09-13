@@ -1,17 +1,19 @@
 
+from copy import deepcopy
+
 from pandas import DataFrame
 from pandas.core.series import Series
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from torch.utils.data import dataloader
-from transformers import BertTokenizer
 from tceframework import config
 from tceframework.data.misc import create_data_loader
 from tceframework.io import dump_encoder, load_encoder
-from tceframework.preprocessing.encoders import encode_inference, encode_train_test
+from tceframework.preprocessing.encoders import (encode_inference,
+                                                 encode_train_test)
 from tceframework.preprocessing.text import clean_nlp
-
 from tceframework.preprocessing.transform import data_preparation
+from torch.utils.data import dataloader
+from transformers import BertTokenizer
 
 
 def preprocessing_training_natureza(data: DataFrame, text_representation: str, section: str) -> tuple[
@@ -49,9 +51,58 @@ def preprocessing_training_natureza(data: DataFrame, text_representation: str, s
 
 def preprocessing_inference_natureza(data: DataFrame, text_representation: str, section: str) -> DataFrame:
     target = data.natureza_despesa_cod
-    cat_col = config.CLF_CAT.copy()
-    text_col = config.CLF_TEXT.copy()
-    num_col = config.CLF_NUM.copy()
+
+    cat_col = [
+        # 'exercicio_do_orcamento_ano',
+        # 'empenho_sequencial_empenho',
+        'orgao',
+        'orgao_sucessor_atual',
+        'tipo_administracao_nome',
+        'tipo_poder_nome',
+        # 'classificacao_orcamentaria_descricao',
+        'funcao',
+        'subfuncao',
+        'programa',
+        'acao',
+        # 'grupo_despesa',
+        # 'elemento_despesa',
+        # 'natureza_despesa_cod',
+        # 'natureza_despesa_nome',
+        # 'formalidade_nome',
+        'modalidade_licitacao_nome',
+        # 'fonte_recurso_cod',
+        'fonte_recurso_nome',
+        'beneficiario_cnpj',
+        'beneficiario_cpf',
+        'beneficiario_cpf/cnpj',
+        'periodo',
+        'empenho_numero_do_processo',
+        # 'empenho_sequencial_empenho.1',
+    ]
+    text_col = [
+        # 'beneficiario_nome',
+        'empenho_historico',
+    ]
+    num_col = [
+        'valor_empenhado',
+        'valor_anulacao_empenho',
+        # 'valor_estorno_anulacao_empenho',
+        'valor_cancelamento_empenho',
+        # 'valor_anulacao_cancelamento_empenho',
+        'valor_saldo_do_empenho',
+        'valor_liquidacao_empenho',
+        'valor_anulacao_liquidacao_empenho',
+        'valor_saldo_liquidado',
+        'valor_ordem_de_pagamento',
+        'valor_guia_recolhimento',
+        'valor_anulacao_ordem_de_pagamento',
+        'valor_estorno_anulacao_o_pagamento',
+        'valor_estorno_guia_recolhimento',
+        'valor_saldo_pago',
+        'valor_saldo_a_pagar',
+        'valor_a_liquidar',
+        'valor_a_pagar_liquidado'
+    ]
 
     data = data.loc[:, (*cat_col,
                         *text_col,
