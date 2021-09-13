@@ -81,13 +81,16 @@ def inference_svm_natureza(data: DataFrame) -> list:
 
 
 def inference_rf_natureza(data: DataFrame) -> list:
-    X = preprocessing_inference_natureza(data.copy(), 'tfidf')
+    X = preprocessing_inference_natureza(data.copy(), 'tfidf', 'above')
     model = load_model(filename='rf_natureza_above_model.pkl')
     y_proba_above = model.predict_proba(X)
     y_pred_above = model.predict(X)
+
+    X = preprocessing_inference_natureza(data.copy(), 'tfidf', 'below')
     model = load_model(filename='rf_natureza_below_model.pkl')
     y_proba_below = model.predict_proba(X)
     y_pred_below = model.predict(X)
+
     y_pred = [
         a if probA >= probB else b
         for a, b, probA, probB in
