@@ -1,4 +1,5 @@
 from functools import partial
+import time
 import warnings
 from numpy import array
 
@@ -7,7 +8,7 @@ from pandas.core.frame import DataFrame
 import tceframework.config as config
 from tceframework.data.filter import scope_filter
 from tceframework.dremio import construct_query, execute_query
-from tceframework.io import load_model, load_scope_dict, save_inference_results, save_json
+from tceframework.io import load_model, load_scope_dict, save_inference_plot, save_inference_results, save_json
 from datetime import datetime
 from tceframework.preprocessing.classification import preprocessing_inference_corretude, preprocessing_inference_natureza
 
@@ -146,10 +147,12 @@ def get_algorithm() -> str:
 
 def inference_flow(filters: dict):
     # Executing query
+    print('Preparando e executando consulta...')
     data = query_dataset(filters)
     data = data.reset_index(drop=True)
     data = regularize_columns_name(data)
 
+    print('Filtrando e preparando escopo...')
     inference_dict = create_inference_dict(data)
     scope_dict = load_scope_dict('scope.pkl')
     data, out_of_scope = scope_filter(data, scope_dict)
@@ -162,12 +165,22 @@ def inference_flow(filters: dict):
     elif get_algorithm() == 'rf':
         inference_natureza = partial(inference_rf_natureza)
 
+    print('Inferência de Natureza...')
+    time_ref = time.time()
     y_pred_natureza = inference_natureza(data.copy())
-    y_pred_corretude = inference_corretude(data.copy())
+    print(f'Duração total: {(time.time() - time_ref)/60}')
 
+    print('Inferência de Corretude...')
+    time_ref = time.time()
+    y_pred_corretude = inference_corretude(data.copy())
+    print(f'Duração total: {(time.time() - time_ref)/60}')
+
+    print('Computando e gravando resultados...')
     inference_dict = compute_output(
         data, inference_dict, y_pred_natureza, y_pred_corretude)
 
     date = datetime.today().strftime('%d-%m-%Y')
 
-    save_inference_results(f'{date}_results.csv', inference_dict)
+    results = save_inference_results(f'{date}_results.csv', inference_dict)
+    save_inference_plot(f'{date}_results_plot.png', results)
+    print('Finalizado.')

@@ -10,6 +10,8 @@ import tceframework.config as config
 import joblib
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def load_csv_data(path: str) -> DataFrame:
@@ -102,9 +104,19 @@ def load_scope_dict(filename):
     return class_dict
 
 
-def save_inference_results(filename: str, inference_dict: dict) -> None:
+def save_inference_results(filename: str, inference_dict: dict) -> DataFrame:
     result = DataFrame(inference_dict).transpose()
     result.to_csv(filename)
+    return result
+
+
+def save_inference_plot(filename: str, data: DataFrame) -> None:
+    sns.set()
+    sns.set_context('talk')
+    plt.figure(15, 10)
+    sns.countplot(y='Resultado', data=data)
+    plt.title('Resumo dos resultados')
+    plt.savefig(filename)
 
 
 def save_json(data, filename):
