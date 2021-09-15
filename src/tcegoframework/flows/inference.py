@@ -5,14 +5,14 @@ from numpy import array
 
 from pandas.core.frame import DataFrame
 
-import tceframework.config as config
-from tceframework.data.filter import scope_filter
-from tceframework.dremio import construct_query, execute_query
-from tceframework.io import load_model, load_scope_dict, save_inference_plot, save_inference_results, save_json
+import tcegoframework.config as config
+from tcegoframework.data.filter import scope_filter
+from tcegoframework.dremio import construct_query, execute_query
+from tcegoframework.io import load_model, load_scope_dict, save_inference_plot, save_inference_results, save_json
 from datetime import datetime
-from tceframework.preprocessing.classification import preprocessing_inference_corretude, preprocessing_inference_natureza
+from tcegoframework.preprocessing.classification import preprocessing_inference_corretude, preprocessing_inference_natureza
 
-from tceframework.preprocessing.text import regularize_columns_name
+from tcegoframework.preprocessing.text import regularize_columns_name
 
 warnings.filterwarnings('ignore')
 

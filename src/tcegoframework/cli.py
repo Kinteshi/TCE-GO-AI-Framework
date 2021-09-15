@@ -3,7 +3,7 @@ import sys
 
 from dateutil.parser import parse
 
-from tceframework import config
+from tcegoframework import config
 
 
 def parseb(date: str):
@@ -11,19 +11,18 @@ def parseb(date: str):
 
 
 # Define parser
-parser = argparse.ArgumentParser(prog='tceframework')
+parser = argparse.ArgumentParser(prog='tcegoframework')
 
 # Define args
 parser.add_argument(
     'task',
     action='store',
-    choices=['train', 'infer', 'eval'],
+    choices=['training', 'inference'],
     type=str,
     help='''
         Tarefa: obrigatório. Seleciona a tarefa a ser executada.
-        \'train\' treina o modelo com todos os dados disponíveis até o dia anterior.
-        \'infer\' Realiza inferência nos empenhos do dia anterior por padrão (para mais opções de filtro veja outros parâmetros).
-        \'eval\' realiza avaliação do desempenho do modelo em dados selecionados pelo filtro (uso de filtro obrigatório).
+        \'training\' treina o modelo com todos os dados disponíveis até o dia anterior.
+        \'inference\' Realiza inferência nos empenhos do dia anterior por padrão (para mais opções de filtro veja outros parâmetros).
         '''
 )
 
@@ -66,40 +65,23 @@ parser.add_argument(
 
 
 def main():
-    # parse args
     args = parser.parse_args()
-
-    if args.task == 'train':
-        # algorithm = config.PARSER.get(
-        #     'options.training',
-        #     'algorithm',
-        #     fallback='svm')
-        # if algorithm == 'svm':
-        #     from tceframework.flows.svmtraining import train
-        #     train()
-        # elif algorithm == 'bert_rf':
-        #     from tceframework.flows.training import train
-        #     train()
-        # else:
-        #     print('Algoritmo não reconhecido')
-        from tceframework.flows.training import train_flow
-        train_flow()
+    filters = {}
+    if args.task == 'training':
+        if args.daterange:
+            filters['daterange'] = args.daterange
+        from tcegoframework.flows.training import train_flow
+        train_flow(filters)
         sys.exit(0)
 
-    elif args.task == 'infer':
+    elif args.task == 'inference':
         filters = {}
-        # Juntar filtros
         if args.dates:
             filters['dates'] = args.dates
         elif args.daterange:
             filters['daterange'] = args.daterange
         if args.orgaos:
             filters['orgaos'] = args.orgaos
-        # algorithm = config.PARSER.get(
-        #     'options.training',
-        #     'algorithm',
-        #     fallback='svm')
-        # Chamar script de inferência
-        from tceframework.flows.inference import inference_flow
+        from tcegoframework.flows.inference import inference_flow
         inference_flow(filters)
         sys.exit(0)

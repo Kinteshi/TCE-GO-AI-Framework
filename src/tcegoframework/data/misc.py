@@ -3,7 +3,7 @@ from typing import Any
 from pandas import DataFrame, Series
 from torch import long, tensor
 from torch.utils.data import DataLoader, Dataset
-import tceframework.config as config
+import tcegoframework.config as config
 
 
 class EmpenhoDataset(Dataset):

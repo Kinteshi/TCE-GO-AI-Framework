@@ -1,4 +1,4 @@
-from tceframework.cli import main
+from tcegoframework.cli import main
 import sys
 
 

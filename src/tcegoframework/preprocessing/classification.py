@@ -5,13 +5,13 @@ from pandas import DataFrame
 from pandas.core.series import Series
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from tceframework import config
-from tceframework.data.misc import create_data_loader
-from tceframework.io import dump_encoder, load_encoder
-from tceframework.preprocessing.encoders import (encode_inference,
-                                                 encode_train_test)
-from tceframework.preprocessing.text import clean_nlp
-from tceframework.preprocessing.transform import data_preparation
+from tcegoframework import config
+from tcegoframework.data.misc import create_data_loader
+from tcegoframework.io import dump_encoder, load_encoder
+from tcegoframework.preprocessing.encoders import (encode_inference,
+                                                   encode_train_test)
+from tcegoframework.preprocessing.text import clean_nlp
+from tcegoframework.preprocessing.transform import data_preparation
 from torch.utils.data import dataloader
 from transformers import BertTokenizer
 

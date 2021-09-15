@@ -1,17 +1,17 @@
 import warnings
 
-import tceframework.config as config
-from tceframework.data.filter import (min_docs_class, remove_class_92,
-                                      remove_expired_classes, initialize_class_dict,
-                                      remove_zeroed_documents)
+import tcegoframework.config as config
+from tcegoframework.data.filter import (min_docs_class, remove_class_92,
+                                        remove_expired_classes, initialize_class_dict,
+                                        remove_zeroed_documents)
 
-from tceframework.io import (change_root_dir_name, dump_model, load_csv_data,
-                             load_encoder, load_excel_data, load_torch_model,
-                             save_scope_dict,
-                             )
-from tceframework.dremio import get_train_data
-from tceframework.model.bert import NaturezaClassifier, fit_bert, get_predictions
-from tceframework.model.metrics import classification_report_csv, special_report_csv
+from tcegoframework.io import (change_root_dir_name, dump_model, load_csv_data,
+                               load_encoder, load_excel_data, load_torch_model,
+                               save_scope_dict,
+                               )
+from tcegoframework.dremio import get_train_data
+from tcegoframework.model.bert import NaturezaClassifier, fit_bert, get_predictions
+from tcegoframework.model.metrics import classification_report_csv, special_report_csv
 from sklearn.ensemble import RandomForestClassifier
 from torch.cuda import empty_cache
 import gc

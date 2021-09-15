@@ -1,14 +1,14 @@
 from numpy import zeros
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
-from tceframework import config
-from tceframework.data.misc import create_data_loader
-from tceframework.io import dump_encoder, load_encoder
+from tcegoframework import config
+from tcegoframework.data.misc import create_data_loader
+from tcegoframework.io import dump_encoder, load_encoder
 from pandas import DataFrame
-from tceframework.model.bert import get_saved_model, generate_bert_representation
+from tcegoframework.model.bert import get_saved_model, generate_bert_representation
 from transformers import BertTokenizer
 
-from tceframework.preprocessing.text import clean_nlp, clean_tfidf
+from tcegoframework.preprocessing.text import clean_nlp, clean_tfidf
 
 
 def generate_fit_scaler(X_train, columns, prefix=''):

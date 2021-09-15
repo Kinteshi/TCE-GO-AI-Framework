@@ -1,4 +1,4 @@
-import tceframework.config as config
+import tcegoframework.config as config
 from pandas import DataFrame
 
 

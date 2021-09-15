@@ -8,8 +8,8 @@ import torch
 from pandas import DataFrame
 from sklearn.metrics import f1_score
 from tqdm import tqdm
-import tceframework.config as config
-from tceframework.io import load_torch_model, printfile, save_torch_model, save_csv_data
+import tcegoframework.config as config
+from tcegoframework.io import load_torch_model, printfile, save_torch_model, save_csv_data
 from torch import nn
 from torch.utils.data import DataLoader
 from transformers import AdamW, BertModel, get_linear_schedule_with_warmup

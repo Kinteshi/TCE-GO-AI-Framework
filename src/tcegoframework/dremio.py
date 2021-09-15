@@ -1,7 +1,7 @@
 import jaydebeapi
 from pandas import DataFrame
 from datetime import date, timedelta
-import tceframework.config as config
+import tcegoframework.config as config
 from pkg_resources import resource_filename
 
 
@@ -9,7 +9,7 @@ from pkg_resources import resource_filename
 # Caminho para driver JDBC do Dremio.
 # pathDremioJDBC = 'dremio-jdbc-driver-14.0.0-202103011714040666-9a0c2e10.jar'
 path_dremio_driver = resource_filename(
-    'tceframework.resources', 'dremio-jdbc-driver.jar')
+    'tcegoframework.resources', 'dremio-jdbc-driver.jar')
 
 # Consulta Base Dremio - Retorna dados do ultimo dia de recepção dos dados
 base_query = 'SELECT "Exercício do orçamento (Ano)" ' \
@@ -94,7 +94,7 @@ def execute_query(query):
     return data
 
 
-def get_train_data():
+def get_train_data(filters: dict):
     query = base_query + ' WHERE c."Exercício do orçamento (Ano)" >= 2015'
     data = execute_query(query)
     return data

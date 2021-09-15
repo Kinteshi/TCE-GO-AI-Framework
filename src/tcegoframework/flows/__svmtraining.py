@@ -4,22 +4,22 @@ from typing import Union
 
 from pandas.core.frame import DataFrame
 
-import tceframework.config as config
+import tcegoframework.config as config
 from scipy.sparse import csr_matrix, data
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
-from tceframework.data.filter import (change_scope, change_scope_dict, get_class92_mask, get_where_expired_class, get_where_under_threshold, get_where_zero_value, initialize_class_dict, create_scope_dict, masked_filter, min_docs_class,
-                                      remove_class_92, remove_expired_classes,
-                                      remove_zeroed_documents)
-from tceframework.data.preprocessing.classification import (
+from tcegoframework.data.filter import (change_scope, change_scope_dict, get_class92_mask, get_where_expired_class, get_where_under_threshold, get_where_zero_value, initialize_class_dict, create_scope_dict, masked_filter, min_docs_class,
+                                        remove_class_92, remove_expired_classes,
+                                        remove_zeroed_documents)
+from tcegoframework.data.preprocessing.classification import (
     pp_second_tabular_training, pp_svm_training)
-from tceframework.data.text import regularize_columns_name
-from tceframework.dremio import get_train_data
-from tceframework.io import (change_root_dir_name, dump_model, load_csv_data,
-                             load_excel_data, save_scope_dict)
-from tceframework.model.metrics import (classification_report_csv,
-                                        special_report_csv)
+from tcegoframework.data.text import regularize_columns_name
+from tcegoframework.dremio import get_train_data
+from tcegoframework.io import (change_root_dir_name, dump_model, load_csv_data,
+                               load_excel_data, save_scope_dict)
+from tcegoframework.model.metrics import (classification_report_csv,
+                                          special_report_csv)
 
 warnings.filterwarnings('ignore')
 

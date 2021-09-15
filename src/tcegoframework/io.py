@@ -6,7 +6,7 @@ import dill
 from pandas import DataFrame, read_csv, read_excel
 from torch import device, load, save
 import json
-import tceframework.config as config
+import tcegoframework.config as config
 import joblib
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier

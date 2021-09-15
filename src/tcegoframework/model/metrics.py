@@ -1,6 +1,6 @@
 from pandas import DataFrame
 from sklearn.metrics import classification_report
-from tceframework.io import load_encoder, save_csv_data
+from tcegoframework.io import load_encoder, save_csv_data
 
 
 def classification_report_csv(y_true, y_pred, encoding: bool, filename: str) -> None:

@@ -10,16 +10,16 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 
-import tceframework.config as config
-from tceframework.data.filter import (
+import tcegoframework.config as config
+from tcegoframework.data.filter import (
     change_scope_dict, create_scope_dict, masked_filter, where_below_threshold, where_class_92, where_expired_class, where_zero_value)
-from tceframework.dremio import get_train_data
-from tceframework.io import (dump_model, load_csv_data, load_excel_data,
-                             save_scope_dict)
-from tceframework.model.metrics import (classification_report_csv,
-                                        special_report_csv)
-from tceframework.preprocessing.classification import preprocessing_training_corretude, preprocessing_training_natureza
-from tceframework.preprocessing.text import regularize_columns_name
+from tcegoframework.dremio import construct_query, execute_query, get_train_data
+from tcegoframework.io import (dump_model, load_csv_data, load_excel_data,
+                               save_scope_dict)
+from tcegoframework.model.metrics import (classification_report_csv,
+                                          special_report_csv)
+from tcegoframework.preprocessing.classification import preprocessing_training_corretude, preprocessing_training_natureza
+from tcegoframework.preprocessing.text import regularize_columns_name
 
 warnings.filterwarnings('ignore')
 
@@ -142,11 +142,15 @@ def data_cleaning(data: DataFrame) -> tuple[DataFrame, DataFrame]:
     return data_above, data_below
 
 
-def get_dataset() -> DataFrame:
+def get_dataset(filters: dict) -> DataFrame:
     if dataset_path := get_dataset_path():
         data = load_csv_data(dataset_path)
     else:
-        data = get_train_data()
+        if filters:
+            query = construct_query(filters)
+            data = execute_query(query)
+        else:
+            data = get_train_data()
     return data
 
 
@@ -209,7 +213,7 @@ def train_corretude(data: DataFrame):
     dump_model(model=model, filename='rf_corretude_model.pkl')
 
 
-def train_flow():
+def train_flow(filters: dict):
     print('Carregando base de dados...')
     data = get_dataset()
     print('Base de dados carregada.')

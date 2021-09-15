@@ -3,10 +3,10 @@ from typing import Iterable, Union
 
 from pandas.core import series
 
-import tceframework.config as config
+import tcegoframework.config as config
 from numpy.lib.function_base import iterable
 from pandas import DataFrame
-from tceframework.io import load_scope_dict
+from tcegoframework.io import load_scope_dict
 
 
 def scope_filter(data: DataFrame, scope_dict: dict) -> tuple[DataFrame, DataFrame]:
