@@ -12,7 +12,6 @@ Para instalar localmente:
 ### Requisitos
 Um arquivo `config.ini` que possua obrigatoriamente a seguinte estrutura deve existir no diretório onde o framework será chamado: 
 
-    ```
     [options.dremio]
     connection = database.address:port
     user = username
@@ -21,7 +20,7 @@ Um arquivo `config.ini` que possua obrigatoriamente a seguinte estrutura deve ex
     [options.training]
     expired_class_path = arquivo_naturezas_vigência_expirada.xlsx
     validated_data_path = dados_validados.xlsx
-    ``` 
+    
 #### `[options.dremio]`
 - `connection`: endereço e porta do banco de dados onde serão feitas as consultas.
 - `user`: nome de usuário do dremio.
