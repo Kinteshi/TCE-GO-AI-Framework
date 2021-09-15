@@ -6,7 +6,7 @@ Antes de começar tenha certeza de que o [pip](https://pip.readthedocs.io/en/sta
 
 Para instalar localmente: 
 
-    $ pip install tcegoaiframework
+    $ pip install tcegoframework
 
 ## Uso
 ### Requisitos
