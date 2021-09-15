@@ -33,14 +33,14 @@ Um arquivo `config.ini` que possua obrigatoriamente a seguinte estrutura deve ex
 ### Treino
 Para iniciar o treinamento: 
 
-    $ tcegoaif-cli training
+    $ tcegoaif training
 
 Será gerada uma estrutura de arquivos que não deve ser modificada para correto funcionamento do framework. 
 
 ### Inferência
 Para que seja possível realizar inferência os arquivos gerados pelo treinamento devem constar no diretório em que o comando for executado: 
 
-    $ tcegoaif-cli inference
+    $ tcegoaif inference
 
 Ao final da inferência são gerados dois arquivos:
 
