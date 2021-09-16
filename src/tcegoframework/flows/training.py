@@ -215,7 +215,7 @@ def train_corretude(data: DataFrame):
 
 def train_flow(filters: dict):
     print('Carregando base de dados...')
-    data = get_dataset()
+    data = get_dataset(filters)
     print('Base de dados carregada.')
 
     if samples := get_sampling_number():
