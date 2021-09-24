@@ -45,7 +45,7 @@ def change_inference_dict(out_of_scope: DataFrame, scope_dict: dict, inference_d
             info = 'Classe desconhecida'
             inference_dict[key]['Natureza Predita'] = info
             inference_dict[key]['Corretude'] = info
-            inference_dict[key]['Resultado'] = 'INC'
+            inference_dict[key]['Resultado'] = 'UNK'
         elif empenho['natureza_despesa_cod'] in scope_dict:
             key = empenho['natureza_despesa_cod']
             if scope_dict[key] != 'Em escopo':
@@ -53,13 +53,14 @@ def change_inference_dict(out_of_scope: DataFrame, scope_dict: dict, inference_d
                 key = empenho['empenho_sequencial_empenho']
                 inference_dict[key]['Natureza Predita'] = info
                 inference_dict[key]['Corretude'] = info
-                inference_dict[key]['Resultado'] = 'INC'
+                info = ''.join([s[0] for s in info.split()]).upper()
+                inference_dict[key]['Resultado'] = info
             elif empenho['valor_saldo_do_empenho'] == 0:
                 key = empenho['empenho_sequencial_empenho']
                 info = 'Saldo zerado'
                 inference_dict[key]['Natureza Predita'] = info
                 inference_dict[key]['Corretude'] = info
-                inference_dict[key]['Resultado'] = 'SE0'
+                inference_dict[key]['Resultado'] = 'SNULO'
     return inference_dict
 
 

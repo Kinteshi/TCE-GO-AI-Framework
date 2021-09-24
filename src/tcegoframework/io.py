@@ -113,7 +113,7 @@ def save_inference_results(filename: str, inference_dict: dict) -> DataFrame:
 def save_inference_plot(filename: str, data: DataFrame) -> None:
     sns.set()
     sns.set_context('talk')
-    plt.figure(15, 10)
+    plt.figure(figsize=(15, 10))
     sns.countplot(y='Resultado', data=data)
     plt.title('Resumo dos resultados')
     plt.savefig(filename)
@@ -123,7 +123,3 @@ def save_json(data, filename):
     with open(filename, 'w') as file:
         json.dump(data, file)
         file.close()
-
-
-def get_full_database():
-    pass
