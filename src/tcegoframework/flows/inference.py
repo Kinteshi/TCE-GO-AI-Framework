@@ -1,5 +1,6 @@
 from functools import partial
 import time
+from typing import Union
 import warnings
 from numpy import array
 
@@ -8,7 +9,7 @@ from pandas.core.frame import DataFrame
 import tcegoframework.config as config
 from tcegoframework.data.filter import scope_filter
 from tcegoframework.dremio import construct_query, execute_query
-from tcegoframework.io import load_model, load_scope_dict, save_inference_plot, save_inference_results, save_json
+from tcegoframework.io import load_csv_data, load_model, load_scope_dict, save_inference_plot, save_inference_results, save_json
 from datetime import datetime
 from tcegoframework.preprocessing.classification import preprocessing_inference_corretude, preprocessing_inference_natureza
 
@@ -44,7 +45,7 @@ def change_inference_dict(out_of_scope: DataFrame, scope_dict: dict, inference_d
             info = 'Classe desconhecida'
             inference_dict[key]['Natureza Predita'] = info
             inference_dict[key]['Corretude'] = info
-            inference_dict[key]['Resultado'] = 'INC'
+            inference_dict[key]['Resultado'] = 'UNK'
         elif empenho['natureza_despesa_cod'] in scope_dict:
             key = empenho['natureza_despesa_cod']
             if scope_dict[key] != 'Em escopo':
@@ -52,13 +53,14 @@ def change_inference_dict(out_of_scope: DataFrame, scope_dict: dict, inference_d
                 key = empenho['empenho_sequencial_empenho']
                 inference_dict[key]['Natureza Predita'] = info
                 inference_dict[key]['Corretude'] = info
-                inference_dict[key]['Resultado'] = 'INC'
+                info = ''.join([s[0] for s in info.split()]).upper()
+                inference_dict[key]['Resultado'] = info
             elif empenho['valor_saldo_do_empenho'] == 0:
                 key = empenho['empenho_sequencial_empenho']
                 info = 'Saldo zerado'
                 inference_dict[key]['Natureza Predita'] = info
                 inference_dict[key]['Corretude'] = info
-                inference_dict[key]['Resultado'] = 'SE0'
+                inference_dict[key]['Resultado'] = 'SNULO'
     return inference_dict
 
 
@@ -145,10 +147,25 @@ def get_algorithm() -> str:
     )
 
 
+def get_dataset_path() -> Union[str, None]:
+    return config.PARSER.get(
+        'options.inference',
+        'dataset_path',
+        fallback=None)
+
+
+def get_dataset(filters: dict) -> DataFrame:
+    if dataset_path := get_dataset_path():
+        data = load_csv_data(dataset_path)
+    else:
+        data = query_dataset(filters)
+    return data
+
+
 def inference_flow(filters: dict):
     # Executing query
     print('Preparando e executando consulta...')
-    data = query_dataset(filters)
+    data = get_dataset(filters)
     data = data.reset_index(drop=True)
     data = regularize_columns_name(data)
 
