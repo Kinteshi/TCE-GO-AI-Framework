@@ -14,11 +14,12 @@ import tcegoframework.config as config
 from tcegoframework.data.filter import (
     change_scope_dict, create_scope_dict, masked_filter, where_below_threshold, where_class_92, where_expired_class, where_zero_value)
 from tcegoframework.dremio import construct_query, execute_query, get_train_data
-from tcegoframework.io import (dump_model, load_csv_data, load_excel_data,
+from tcegoframework.io import (dump_model, load_csv_data, load_encoder, load_excel_data, load_torch_model, save_bert_history_plot,
                                save_scope_dict)
+from tcegoframework.model.bert import NaturezaClassifier, fit_bert, get_predictions
 from tcegoframework.model.metrics import (classification_report_csv,
                                           special_report_csv)
-from tcegoframework.preprocessing.classification import preprocessing_training_corretude, preprocessing_training_natureza
+from tcegoframework.preprocessing.classification import preprocessing_training_corretude, preprocessing_training_natureza, preprocessing_training_natureza_bert
 from tcegoframework.preprocessing.text import regularize_columns_name
 
 warnings.filterwarnings('ignore')
@@ -64,7 +65,15 @@ def get_algorithm() -> str:
     return config.PARSER.get(
         'options.training',
         'algorithm',
-        fallback='svm'
+        fallback='bert_rf'
+    )
+
+
+def get_epochs() -> int:
+    return config.PARSER.getint(
+        'options.training',
+        'epochs',
+        fallback=5
     )
 
 
@@ -199,6 +208,63 @@ def train_svm_natureza(data: DataFrame, section: str):
     dump_model(model=model, filename=f'svm_natureza_{section}_model.pkl')
 
 
+def get_n_naturezas(data: DataFrame) -> int:
+    n_classes = data['natureza_despesa_cod'].value_counts().shape[0]
+    return n_classes
+
+
+def train_bert_natureza(data: DataFrame, section: str) -> None:
+    traindl, testdl = preprocessing_training_natureza_bert(data, section)
+
+    n_classes = get_n_naturezas(data)
+
+    bert_model = NaturezaClassifier(n_classes=n_classes)
+    history = fit_bert(model=bert_model, epochs=get_epochs(),
+                       train_data_loader=traindl, test_data_loader=testdl, section=section)
+
+    save_bert_history_plot(history, section)
+
+    bert_model = NaturezaClassifier(n_classes=n_classes)
+    bert_model = bert_model.to(config.BERT_DEVICE)
+    state_dict = load_torch_model(filename=f'bert_model_{section}.bin')
+    bert_model.load_state_dict(state_dict)
+
+    result = get_predictions(model=bert_model, data_loader=testdl)
+
+    label_encoder = load_encoder(f'le_bert_{section}.pkl')
+
+    y_true = label_encoder.inverse_transform(result['real_values'])
+    y_pred = label_encoder.inverse_transform(result['predictions'])
+
+    special_report_csv(
+        y_true=y_true,
+        y_pred=y_pred,
+        data=data,
+        encoding=False,
+        filename=f'rf_bert_{section}_rep.csv')
+
+
+def train_bert_rf_natureza(data: DataFrame, section: str):
+
+    train_bert_natureza(data, section)
+
+    X_train, X_test, y_train, y_test = preprocessing_training_natureza(
+        data.copy(), 'bert', section)
+
+    model = RandomForestClassifier(
+        n_estimators=500, n_jobs=-1, random_state=config.RANDOM_SEED)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    special_report_csv(
+        y_true=y_test,
+        y_pred=y_pred,
+        data=data,
+        encoding=False,
+        filename=f'rf_natureza_{section}_rep.csv')
+    dump_model(model=model, filename=f'rf_natureza_{section}_model.pkl')
+
+
 def train_corretude(data: DataFrame):
     X_train, X_test, y_train, y_test = preprocessing_training_corretude(
         data.copy())
@@ -232,6 +298,8 @@ def train_flow(filters: dict):
         train_natureza = partial(train_svm_natureza)
     elif get_algorithm() == 'rf':
         train_natureza = partial(train_rf_natureza)
+    elif get_algorithm() == 'bert_rf':
+        train_natureza = partial(train_bert_rf_natureza)
 
     print('Iniciando treinamento do classificador de natureza de despesa')
     print('Treinamento do modelo de classes maiores')

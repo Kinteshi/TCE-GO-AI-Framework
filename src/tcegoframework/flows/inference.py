@@ -102,6 +102,25 @@ def inference_rf_natureza(data: DataFrame) -> list:
     return array(y_pred)
 
 
+def inference_bert_rf_natureza(data: DataFrame) -> array:
+    X = preprocessing_inference_natureza(data.copy(), 'bert', 'above')
+    model = load_model(filename='rf_natureza_above_model.pkl')
+    y_proba_above = model.predict_proba(X)
+    y_pred_above = model.predict(X)
+
+    X = preprocessing_inference_natureza(data.copy(), 'bert', 'below')
+    model = load_model(filename='rf_natureza_below_model.pkl')
+    y_proba_below = model.predict_proba(X)
+    y_pred_below = model.predict(X)
+
+    y_pred = [
+        a if probA.max() >= probB.max() else b
+        for a, b, probA, probB in
+        zip(y_pred_above, y_pred_below, y_proba_above, y_proba_below)
+    ]
+    return array(y_pred)
+
+
 def inference_corretude(data: DataFrame) -> array:
     X = preprocessing_inference_corretude(data.copy())
     model = load_model(filename='rf_corretude_model.pkl')
@@ -143,7 +162,7 @@ def get_algorithm() -> str:
     return config.PARSER.get(
         'options.training',
         'algorithm',
-        fallback='svm'
+        fallback='bert_rf'
     )
 
 
@@ -181,6 +200,8 @@ def inference_flow(filters: dict):
         inference_natureza = partial(inference_svm_natureza)
     elif get_algorithm() == 'rf':
         inference_natureza = partial(inference_rf_natureza)
+    elif get_algorithm() == 'bert_rf':
+        inference_natureza = partial(inference_bert_rf_natureza)
 
     print('Inferência de Natureza...')
     time_ref = time.time()

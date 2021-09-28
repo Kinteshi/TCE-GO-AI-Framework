@@ -119,6 +119,43 @@ def save_inference_plot(filename: str, data: DataFrame) -> None:
     plt.savefig(filename)
 
 
+def save_bert_history_plot(history: dict, section: str) -> None:
+
+    sns.set()
+    sns.set_context('talk')
+    plt.figure(figsize=(15, 10))
+
+    plt.cla()
+    plt.plot(history['train_loss'], label='train loss')
+    plt.plot(history['val_loss'], label='validation loss')
+    plt.title('Training history')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend()
+    plt.ylim([0, 1])
+    plt.savefig(f'{config.META_PATH}/{section}_loss.png')
+
+    plt.cla()
+    plt.plot(history['train_macro'], label='train macro')
+    plt.plot(history['val_macro'], label='validation macro')
+    plt.title('Training history')
+    plt.ylabel('Macro')
+    plt.xlabel('Epoch')
+    plt.legend()
+    plt.ylim([0, 1])
+    plt.savefig(f'{config.META_PATH}/{section}_macro.png')
+
+    plt.cla()
+    plt.plot(history['train_micro'], label='train micro')
+    plt.plot(history['val_micro'], label='validation micro')
+    plt.title('Training history')
+    plt.ylabel('Micro')
+    plt.xlabel('Epoch')
+    plt.legend()
+    plt.ylim([0, 1])
+    plt.savefig(f'{config.META_PATH}/{section}_micro.png')
+
+
 def save_json(data, filename):
     with open(filename, 'w') as file:
         json.dump(data, file)

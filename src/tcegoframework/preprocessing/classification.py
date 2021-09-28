@@ -116,7 +116,7 @@ def preprocessing_inference_natureza(data: DataFrame, text_representation: str, 
     return X
 
 
-def preprocessing_training_natureza_bert(data: DataFrame) -> tuple[dataloader.DataLoader, dataloader.DataLoader]:
+def preprocessing_training_natureza_bert(data: DataFrame, section: str) -> tuple[dataloader.DataLoader, dataloader.DataLoader]:
     data = data[['empenho_historico', 'natureza_despesa_cod']]
     data['empenho_historico'].update(data['empenho_historico'].map(clean_nlp))
     tokenizer = BertTokenizer.from_pretrained(config.PRE_TRAINED_MODEL_NAME)
@@ -136,7 +136,7 @@ def preprocessing_training_natureza_bert(data: DataFrame) -> tuple[dataloader.Da
         encoder.fit_transform(df_train['natureza_despesa_cod']))
     df_test['natureza_despesa_cod'].update(
         encoder.transform(df_test['natureza_despesa_cod']))
-    dump_encoder(encoder, 'targetNLP.pkl')
+    dump_encoder(encoder, f'le_bert_{section}.pkl')
 
     traindl = create_data_loader(df_train, tokenizer)
     testdl = create_data_loader(df_test, tokenizer)
@@ -144,12 +144,12 @@ def preprocessing_training_natureza_bert(data: DataFrame) -> tuple[dataloader.Da
     return traindl, testdl
 
 
-def preprocessing_inference_natureza_bert(data: DataFrame) -> dataloader.DataLoader:
+def preprocessing_inference_natureza_bert(data: DataFrame, section: str) -> dataloader.DataLoader:
     data = data[['empenho_historico', 'natureza_despesa_cod']]
     data['empenho_historico'].update(data['empenho_historico'].map(clean_nlp))
     tokenizer = BertTokenizer.from_pretrained(config.PRE_TRAINED_MODEL_NAME)
 
-    encoder = load_encoder('targetNLP.pkl')
+    encoder = load_encoder(f'le_bert_{section}.pkl')
     data['natureza_despesa_cod'].update(
         encoder.fit_transform(data['natureza_despesa_cod']))
 
