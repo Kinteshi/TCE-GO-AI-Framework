@@ -104,12 +104,12 @@ def inference_rf_natureza(data: DataFrame) -> list:
 
 def inference_bert_rf_natureza(data: DataFrame) -> array:
     X = preprocessing_inference_natureza(data.copy(), 'bert', 'above')
-    model = load_model(filename='rf_natureza_above_model.pkl')
+    model = load_model(filename='bert_rf_natureza_above_model.pkl')
     y_proba_above = model.predict_proba(X)
     y_pred_above = model.predict(X)
 
     X = preprocessing_inference_natureza(data.copy(), 'bert', 'below')
-    model = load_model(filename='rf_natureza_below_model.pkl')
+    model = load_model(filename='bert_rf_natureza_below_model.pkl')
     y_proba_below = model.predict_proba(X)
     y_pred_below = model.predict(X)
 

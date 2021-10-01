@@ -241,7 +241,7 @@ def train_bert_natureza(data: DataFrame, section: str) -> None:
         y_pred=y_pred,
         data=data,
         encoding=False,
-        filename=f'rf_bert_{section}_rep.csv')
+        filename=f'bert_{section}_rep.csv')
 
 
 def train_bert_rf_natureza(data: DataFrame, section: str):
@@ -261,8 +261,8 @@ def train_bert_rf_natureza(data: DataFrame, section: str):
         y_pred=y_pred,
         data=data,
         encoding=False,
-        filename=f'rf_natureza_{section}_rep.csv')
-    dump_model(model=model, filename=f'rf_natureza_{section}_model.pkl')
+        filename=f'bert_rf_natureza_{section}_rep.csv')
+    dump_model(model=model, filename=f'bert_rf_natureza_{section}_model.pkl')
 
 
 def train_corretude(data: DataFrame):

@@ -43,7 +43,8 @@ def preprocessing_training_natureza(data: DataFrame, text_representation: str, s
                                         y_train=y_train,
                                         y_test=y_test,
                                         prefix=f'nat_{section}',
-                                        text_representation=text_representation)
+                                        text_representation=text_representation,
+                                        section=section)
 
     return X_train, X_test, y_train, y_test
 
@@ -110,8 +111,15 @@ def preprocessing_inference_natureza(data: DataFrame, text_representation: str, 
     data, categorical_columns, numerical_columns = data_preparation(
         data, categorical_columns=cat_col, numerical_columns=config.CLF_NUM, )
 
-    X = encode_inference(data, target, numerical_columns, categorical_columns,
-                         config.CLF_TEXT, prefix=f'nat_{section}', text_representation=text_representation)
+    X = encode_inference(
+        data,
+        target,
+        numerical_columns,
+        categorical_columns,
+        config.CLF_TEXT,
+        prefix=f'nat_{section}',
+        text_representation=text_representation,
+        section=section)
 
     return X
 

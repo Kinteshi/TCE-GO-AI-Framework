@@ -11,7 +11,9 @@ from sklearn.metrics import f1_score
 from tcegoframework.io import load_torch_model, save_csv_data, save_torch_model
 from torch import nn
 from torch.utils.data import DataLoader
-from transformers import AdamW, BertModel, get_linear_schedule_with_warmup
+from transformers import AdamW, BertModel, get_linear_schedule_with_warmup, logging
+
+logging.set_verbosity_error()
 
 
 class NaturezaClassifier(nn.Module):
@@ -187,7 +189,7 @@ def generate_bert_representation(model, data_loader) -> DataFrame:
     with torch.no_grad():
         outs = []
         for d in data_loader:
-            text = d['empenho_text']
+            _ = d['empenho_text']
             input_ids = d['input_ids'].to(config.BERT_DEVICE)
             attention_mask = d['attention_mask'].to(config.BERT_DEVICE)
             _, pooler = model(input_ids, attention_mask)
@@ -200,9 +202,9 @@ def generate_bert_representation(model, data_loader) -> DataFrame:
     return representation
 
 
-def get_saved_model(n_classes: int):
+def get_saved_model(n_classes: int, section: str):
     model = NaturezaClassifier(
         n_classes, config.PRE_TRAINED_MODEL_NAME)
-    state_dict = load_torch_model('bert_model.bin')
+    state_dict = load_torch_model(f'bert_model_{section}.bin')
     model.load_state_dict(state_dict)
     return model
