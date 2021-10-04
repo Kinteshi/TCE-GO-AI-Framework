@@ -114,7 +114,7 @@ def generate_process_count(data):
     return data
 
 
-def generate_bert_representation(X, y, columns, model, encoder) -> DataFrame:
+def generate_bert(X, y, columns, model, encoder) -> DataFrame:
     tokenizer = BertTokenizer.from_pretrained(config.PRE_TRAINED_MODEL_NAME)
     for col_name in columns:
         X[col_name].update(X[col_name].map(clean_nlp))
@@ -122,7 +122,7 @@ def generate_bert_representation(X, y, columns, model, encoder) -> DataFrame:
         data[col_name] = X[col_name].reset_index(drop=True)
         data['natureza_despesa_cod'] = y.reset_index(drop=True)
         data['natureza_despesa_cod'].update(
-            encoder.transform(data['natureza_despesa_cod']))
+            zeros(shape=data['natureza_despesa_cod'].shape))
         data_loader = create_data_loader(
             data, tokenizer)
         representation = generate_bert_representation(model, data_loader)
@@ -132,7 +132,7 @@ def generate_bert_representation(X, y, columns, model, encoder) -> DataFrame:
 
 
 def encode_train_test(X_train: DataFrame, X_test: DataFrame, numerical_columns: list, categorical_columns: list,
-                      text_columns: list, y_train, y_test, prefix: str, text_representation: str) -> DataFrame:
+                      text_columns: list, y_train, y_test, prefix: str, text_representation: str, section: str = None) -> DataFrame:
     X_train = X_train.reset_index(drop=True)
     X_test = X_test.reset_index(drop=True)
 
@@ -152,18 +152,18 @@ def encode_train_test(X_train: DataFrame, X_test: DataFrame, numerical_columns: 
         X_train = generate_fit_tfidf(X_train, text_columns, prefix)
         X_test = generate_tfidf(X_test, text_columns, prefix)
     elif text_representation == 'bert':
-        label_encoder = load_encoder('targetNLP.pkl')
-        model = get_saved_model(len(label_encoder.classes_))
-        X_train = generate_bert_representation(
+        label_encoder = load_encoder(f'le_bert_{section}.pkl')
+        model = get_saved_model(len(label_encoder.classes_), section)
+        X_train = generate_bert(
             X_train, y_train, text_columns, model, label_encoder)
-        X_test = generate_bert_representation(
+        X_test = generate_bert(
             X_test, y_test, text_columns, model, label_encoder)
 
     return X_train, X_test
 
 
 def encode_inference(X, y, numerical_columns: list, categorical_columns: list, text_columns: list, prefix: str,
-                     text_representation: str) -> DataFrame:
+                     text_representation: str, section: str = None) -> DataFrame:
     X = X.reset_index(drop=True)
 
     if 'empenho_numero_do_processo' in categorical_columns:
@@ -178,9 +178,8 @@ def encode_inference(X, y, numerical_columns: list, categorical_columns: list, t
     if text_representation == 'tfidf':
         X = generate_tfidf(X, text_columns, prefix)
     elif text_representation == 'bert':
-        label_encoder = load_encoder('targetNLP.pkl')
-        model = get_saved_model(len(label_encoder.classes_))
-        X = generate_bert_representation(
-            X, y, text_columns, model, label_encoder)
+        label_encoder = load_encoder(f'le_bert_{section}.pkl')
+        model = get_saved_model(len(label_encoder.classes_), section)
+        X = generate_bert(X, y, text_columns, model, label_encoder)
 
     return X

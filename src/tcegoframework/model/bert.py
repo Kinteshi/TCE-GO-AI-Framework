@@ -4,15 +4,16 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import tcegoframework.config as config
 import torch
 from pandas import DataFrame
 from sklearn.metrics import f1_score
-from tqdm import tqdm
-import tcegoframework.config as config
-from tcegoframework.io import load_torch_model, printfile, save_torch_model, save_csv_data
+from tcegoframework.io import load_torch_model, save_csv_data, save_torch_model
 from torch import nn
 from torch.utils.data import DataLoader
-from transformers import AdamW, BertModel, get_linear_schedule_with_warmup
+from transformers import AdamW, BertModel, get_linear_schedule_with_warmup, logging
+
+logging.set_verbosity_error()
 
 
 class NaturezaClassifier(nn.Module):
@@ -38,7 +39,7 @@ def train_epoch(model: NaturezaClassifier, data_loader, loss_fn, optimizer, sche
     correct_predictions = 0
     predictions = []
     real_values = []
-    for d in tqdm(data_loader):
+    for d in data_loader:
         input_ids = d["input_ids"].to(config.BERT_DEVICE)
         attention_mask = d["attention_mask"].to(config.BERT_DEVICE)
         targets = d["targets"].to(config.BERT_DEVICE)
@@ -71,7 +72,7 @@ def eval_model(model, data_loader, loss_fn, n_examples):
     predictions = []
     real_values = []
     with torch.no_grad():
-        for d in tqdm(data_loader):
+        for d in data_loader:
             input_ids = d["input_ids"].to(config.BERT_DEVICE)
             attention_mask = d["attention_mask"].to(config.BERT_DEVICE)
             targets = d["targets"].to(config.BERT_DEVICE)
@@ -92,7 +93,7 @@ def eval_model(model, data_loader, loss_fn, n_examples):
     return correct_predictions.double() / n_examples, np.mean(losses), macro, micro
 
 
-def fit_bert(model: NaturezaClassifier, epochs: int, train_data_loader: DataLoader, test_data_loader: DataLoader) -> dict:
+def fit_bert(model: NaturezaClassifier, epochs: int, train_data_loader: DataLoader, test_data_loader: DataLoader, section: str) -> dict:
 
     # np.random.seed(RANDOM_SEED)
     # torch.manual_seed(RANDOM_SEED)
@@ -109,7 +110,7 @@ def fit_bert(model: NaturezaClassifier, epochs: int, train_data_loader: DataLoad
 
     history = defaultdict(list)
     best_accuracy = 0
-    for epoch in tqdm(range(epochs)):
+    for epoch in range(epochs):
         starting = time.time()
         print(f'Epoch {epoch + 1}')
         print('-' * 10)
@@ -142,14 +143,14 @@ def fit_bert(model: NaturezaClassifier, epochs: int, train_data_loader: DataLoad
         history['val_micro'].append(val_micro)
 
         if val_acc > best_accuracy:
-            save_torch_model(model.state_dict(), 'bert_model.bin')
+            save_torch_model(model.state_dict(), f'bert_model_{section}.bin')
             best_accuracy = val_acc
 
         print(
             f'Epoch time: {(time.time()-starting)/60}')
 
     history = DataFrame(history)
-    save_csv_data(history, 'bert_history.csv')
+    save_csv_data(history, f'bert_history_{section}.csv')
 
     return history
 
@@ -162,7 +163,7 @@ def get_predictions(model: NaturezaClassifier, data_loader: DataLoader,) -> dict
     prediction_probs = []
     real_values = []
     with torch.no_grad():
-        for d in tqdm(data_loader):
+        for d in data_loader:
             texts = d["empenho_text"]
             input_ids = d["input_ids"].to(config.BERT_DEVICE)
             attention_mask = d["attention_mask"].to(config.BERT_DEVICE)
@@ -182,46 +183,13 @@ def get_predictions(model: NaturezaClassifier, data_loader: DataLoader,) -> dict
     return {'review_texts': review_texts, 'predictions': predictions, 'prediction_probs': prediction_probs, 'real_values': real_values}
 
 
-# def treinamento_bert(history: dict) -> None:
-
-#     plt.cla()
-#     plt.plot(history['train_loss'], label='train loss')
-#     plt.plot(history['val_loss'], label='validation loss')
-#     plt.title('Training history')
-#     plt.ylabel('Loss')
-#     plt.xlabel('Epoch')
-#     plt.legend()
-#     plt.ylim([0, 1])
-#     plt.savefig('Loss.png')
-
-#     plt.cla()
-#     plt.plot(history['train_macro'], label='train macro')
-#     plt.plot(history['val_macro'], label='validation macro')
-#     plt.title('Training history')
-#     plt.ylabel('Macro')
-#     plt.xlabel('Epoch')
-#     plt.legend()
-#     plt.ylim([0, 1])
-#     plt.savefig('Macro.png')
-
-#     plt.cla()
-#     plt.plot(history['train_micro'], label='train micro')
-#     plt.plot(history['val_micro'], label='validation micro')
-#     plt.title('Training history')
-#     plt.ylabel('Micro')
-#     plt.xlabel('Epoch')
-#     plt.legend()
-#     plt.ylim([0, 1])
-#     plt.savefig('Micro.png')
-
-
 def generate_bert_representation(model, data_loader) -> DataFrame:
     model = model.to(config.BERT_DEVICE)
     model = model.eval()
     with torch.no_grad():
         outs = []
-        for d in tqdm(data_loader):
-            text = d['empenho_text']
+        for d in data_loader:
+            _ = d['empenho_text']
             input_ids = d['input_ids'].to(config.BERT_DEVICE)
             attention_mask = d['attention_mask'].to(config.BERT_DEVICE)
             _, pooler = model(input_ids, attention_mask)
@@ -234,9 +202,9 @@ def generate_bert_representation(model, data_loader) -> DataFrame:
     return representation
 
 
-def get_saved_model(n_classes: int):
+def get_saved_model(n_classes: int, section: str):
     model = NaturezaClassifier(
         n_classes, config.PRE_TRAINED_MODEL_NAME)
-    state_dict = load_torch_model('bert_model.bin')
+    state_dict = load_torch_model(f'bert_model_{section}.bin')
     model.load_state_dict(state_dict)
     return model
