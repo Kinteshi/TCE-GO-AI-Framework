@@ -122,7 +122,7 @@ def generate_bert(X, y, columns, model, encoder) -> DataFrame:
         data[col_name] = X[col_name].reset_index(drop=True)
         data['natureza_despesa_cod'] = y.reset_index(drop=True)
         data['natureza_despesa_cod'].update(
-            encoder.transform(data['natureza_despesa_cod']))
+            zeros(shape=data['natureza_despesa_cod'].shape))
         data_loader = create_data_loader(
             data, tokenizer)
         representation = generate_bert_representation(model, data_loader)
