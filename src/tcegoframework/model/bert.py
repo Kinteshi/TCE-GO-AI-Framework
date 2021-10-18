@@ -11,7 +11,8 @@ from sklearn.metrics import f1_score
 from tcegoframework.io import load_torch_model, save_csv_data, save_torch_model
 from torch import nn
 from torch.utils.data import DataLoader
-from transformers import AdamW, BertModel, get_linear_schedule_with_warmup, logging
+from transformers import (AdamW, BertModel, get_linear_schedule_with_warmup,
+                          logging)
 
 logging.set_verbosity_error()
 

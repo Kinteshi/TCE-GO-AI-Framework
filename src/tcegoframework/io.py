@@ -1,17 +1,22 @@
+import json
 from os import makedirs, rename
 from os.path import dirname
 from typing import Any, Union
 
 import dill
-from pandas import DataFrame, read_csv, read_excel
-from torch import device, load, save
-import json
-import tcegoframework.config as config
 import joblib
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
+from pandas import DataFrame, read_csv, read_excel
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from torch import device, load, save
+
+import tcegoframework.config as config
+from tcegoframework.cfgparsing import (get_hdfs_dir_path, get_hdfs_domain,
+                                       get_hdfs_password, get_hdfs_port,
+                                       get_hdfs_url, get_hdfs_user, use_hdfs)
+from tcegoframework.tcehdfs import TCEHDFS
 
 
 def load_csv_data(path: str) -> DataFrame:
@@ -107,6 +112,25 @@ def load_scope_dict(filename):
 def save_inference_results(filename: str, inference_dict: dict) -> DataFrame:
     result = DataFrame(inference_dict).transpose()
     result.to_csv(filename)
+
+    if use_hdfs():
+        try:
+            hdfs = TCEHDFS(
+                get_hdfs_domain(),
+                get_hdfs_url(),
+                get_hdfs_port(),
+                get_hdfs_user(),
+                get_hdfs_password()
+            )
+
+            hdfs.writeHDFS(
+                get_hdfs_dir_path(),
+                filename,
+                result
+            )
+        except Exception as e:
+            print('Ocorreu um erro ao salvar os resultados no HDFS. Erro: ', e)
+
     return result
 
 

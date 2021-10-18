@@ -1,12 +1,9 @@
 from functools import partial
-from typing import Iterable, Union
-
-from pandas.core import series
+from typing import Iterable
 
 import tcegoframework.config as config
-from numpy.lib.function_base import iterable
 from pandas import DataFrame
-from tcegoframework.io import load_scope_dict
+from pandas.core import series
 
 
 def scope_filter(data: DataFrame, scope_dict: dict) -> tuple[DataFrame, DataFrame]:

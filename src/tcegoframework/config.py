@@ -1,8 +1,6 @@
 import torch
-from configparser import ConfigParser
 
-PARSER = ConfigParser()
-PARSER.read('config.ini')
+from tcegoframework.cfgparsing import get_random_seed
 
 # Directiores
 ROOT_DIR = 'TCEGO_IA_DATA/'
@@ -12,7 +10,7 @@ STDOUT_REDIR_PATH = ROOT_DIR
 META_PATH = ROOT_DIR + 'meta/'
 
 # General
-RANDOM_SEED = PARSER.getint('options.general', 'random_seed', fallback=15)
+RANDOM_SEED = get_random_seed()
 
 # BERT settings
 PRE_TRAINED_MODEL_NAME = 'neuralmind/bert-base-portuguese-cased'

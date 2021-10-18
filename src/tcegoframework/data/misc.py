@@ -1,9 +1,9 @@
 from typing import Any
 
+import tcegoframework.config as config
 from pandas import DataFrame, Series
 from torch import long, tensor
 from torch.utils.data import DataLoader, Dataset
-import tcegoframework.config as config
 
 
 class EmpenhoDataset(Dataset):
