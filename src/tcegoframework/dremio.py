@@ -66,7 +66,7 @@ base_query = 'SELECT "Exercício do orçamento (Ano)" ' \
 def get_connection():
     conn = jaydebeapi.connect(
         'com.dremio.jdbc.Driver',
-        get_dremio_connection()
+        get_dremio_connection(),
         [
             get_dremio_user(),
             get_dremio_password()
@@ -89,7 +89,7 @@ def execute_query(query):
     return data
 
 
-def get_train_data(filters: dict):
+def get_train_data():
     query = base_query + ' WHERE c."Exercício do orçamento (Ano)" >= 2015'
     data = execute_query(query)
     return data
