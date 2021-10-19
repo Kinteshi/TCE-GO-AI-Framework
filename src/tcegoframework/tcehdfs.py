@@ -26,8 +26,7 @@ class TCEHDFS:
                 stdin=PIPE,
                 stdout=PIPE,
                 stderr=PIPE)
-            self.child = pexpect.spawn(
-                'kinit %s@%s' % (self.user, self.domain))
+            self.child = pexpect.spawn(f'kinit {self.user}@{self.domain}')
             self.child.expect('Password*')
             self.child.sendline(str(self.pwd))
 

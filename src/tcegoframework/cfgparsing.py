@@ -1,8 +1,6 @@
 from configparser import ConfigParser
 from typing import Union
 
-from tcegoframework.config import config
-
 PARSER = ConfigParser()
 PARSER.read('config.ini')
 
@@ -74,7 +72,7 @@ def get_inference_dataset_path() -> Union[str, None]:
 # [options.hdfs]
 
 def use_hdfs() -> bool:
-    return PARSER.getboolean(HDFS, 'use', fallback=False)
+    return PARSER.getboolean(HDFS, 'use', fallback=True)
 
 
 def get_hdfs_domain() -> str:
