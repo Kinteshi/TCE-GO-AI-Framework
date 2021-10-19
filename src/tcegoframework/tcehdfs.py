@@ -36,7 +36,7 @@ class TCEHDFS:
                 host=self.url,
                 port=self.port,
                 pars={"hadoop.security.authentication": "kerberos"},
-                user='pyprod')
+                user=self.user)
 
         except Exception as e:
             print("Erro ao logar no HDFS. Erro:", e)
