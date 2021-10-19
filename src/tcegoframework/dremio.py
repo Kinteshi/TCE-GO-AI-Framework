@@ -63,7 +63,7 @@ base_query = 'SELECT "Exercício do orçamento (Ano)" ' \
 
 
 
-def get_connection(path_):
+def get_connection():
     conn = jaydebeapi.connect(
         'com.dremio.jdbc.Driver',
         get_dremio_connection()
