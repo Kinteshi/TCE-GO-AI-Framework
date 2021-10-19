@@ -1,80 +1,40 @@
-from functools import partial
 import gc
 import time
 import warnings
+from functools import partial
 from typing import Union
 
+import tcegoframework.config as config
 from pandas.core.frame import DataFrame
 from scipy.sparse import csr_matrix
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
-
-import tcegoframework.config as config
-from tcegoframework.data.filter import (
-    change_scope_dict, create_scope_dict, masked_filter, where_below_threshold, where_class_92, where_expired_class, where_zero_value)
-from tcegoframework.dremio import construct_query, execute_query, get_train_data
-from tcegoframework.io import (dump_model, load_csv_data, load_encoder, load_excel_data, load_torch_model, save_bert_history_plot,
-                               save_scope_dict)
-from tcegoframework.model.bert import NaturezaClassifier, fit_bert, get_predictions
+from tcegoframework.cfgparsing import (get_algorithm, get_epochs,
+                                       get_expired_labels_path,
+                                       get_label_population_floor,
+                                       get_training_dataset_path,
+                                       get_training_sampling_number,
+                                       get_validated_data_path)
+from tcegoframework.data.filter import (change_scope_dict, create_scope_dict,
+                                        masked_filter, where_below_threshold,
+                                        where_class_92, where_expired_class,
+                                        where_zero_value)
+from tcegoframework.dremio import (construct_query, execute_query,
+                                   get_train_data)
+from tcegoframework.io import (dump_model, load_csv_data, load_encoder,
+                               load_excel_data, load_torch_model,
+                               save_bert_history_plot, save_scope_dict)
+from tcegoframework.model.bert import (NaturezaClassifier, fit_bert,
+                                       get_predictions)
 from tcegoframework.model.metrics import (classification_report_csv,
                                           special_report_csv)
-from tcegoframework.preprocessing.classification import preprocessing_training_corretude, preprocessing_training_natureza, preprocessing_training_natureza_bert
+from tcegoframework.preprocessing.classification import (
+    preprocessing_training_corretude, preprocessing_training_natureza,
+    preprocessing_training_natureza_bert)
 from tcegoframework.preprocessing.text import regularize_columns_name
 
 warnings.filterwarnings('ignore')
-
-
-def get_dataset_path() -> Union[str, None]:
-    return config.PARSER.get(
-        'options.training',
-        'dataset_path',
-        fallback=None)
-
-
-def get_sampling_number() -> Union[int, None]:
-    return config.PARSER.getint(
-        'options.training',
-        'sample_dataset',
-        fallback=None)
-
-
-def get_expired_labels_path() -> str:
-    return config.PARSER.get(
-        'options.training',
-        'expired_class_path'
-    )
-
-
-def get_validated_data_path() -> str:
-    file = config.PARSER.get(
-        'options.training',
-        'validated_data_path',)
-    return file
-
-
-def get_label_population_floor() -> int:
-    return config.PARSER.getint(
-        'options.training',
-        'min_documents_class',
-        fallback=2
-    )
-
-
-def get_algorithm() -> str:
-    return config.PARSER.get(
-        'options.training',
-        'algorithm',
-        fallback='bert_rf'
-    )
-
-
-def get_epochs() -> int:
-    return config.PARSER.getint(
-        'options.training',
-        'epochs',
-        fallback=5
-    )
 
 
 def dataframe_reset_index(dataframe: DataFrame) -> DataFrame:
@@ -152,7 +112,7 @@ def data_cleaning(data: DataFrame) -> tuple[DataFrame, DataFrame]:
 
 
 def get_dataset(filters: dict) -> DataFrame:
-    if dataset_path := get_dataset_path():
+    if dataset_path := get_training_dataset_path():
         data = load_csv_data(dataset_path)
     else:
         if filters:
@@ -284,7 +244,7 @@ def train_flow(filters: dict):
     data = get_dataset(filters)
     print('Base de dados carregada.')
 
-    if samples := get_sampling_number():
+    if samples := get_training_sampling_number():
         data = data.sample(samples, random_state=config.RANDOM_SEED)
         data = dataframe_reset_index(data.copy())
 

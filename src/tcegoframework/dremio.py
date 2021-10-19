@@ -1,9 +1,12 @@
+from datetime import date, timedelta
+
 import jaydebeapi
 from pandas import DataFrame
-from datetime import date, timedelta
-import tcegoframework.config as config
 from pkg_resources import resource_filename
 
+import tcegoframework.config as config
+from tcegoframework.cfgparsing import (get_dremio_connection,
+                                       get_dremio_password, get_dremio_user)
 
 # Variuaveis
 # Caminho para driver JDBC do Dremio.
@@ -60,21 +63,13 @@ base_query = 'SELECT "Exercício do orçamento (Ano)" ' \
 
 
 
-def get_connection():
+def get_connection(path_):
     conn = jaydebeapi.connect(
         'com.dremio.jdbc.Driver',
-        config.PARSER.get(
-            'options.dremio',
-            'connection'),
+        get_dremio_connection()
         [
-            config.PARSER.get(
-                'options.dremio',
-                'user'
-            ),
-            config.PARSER.get(
-                'options.dremio',
-                'password'
-            )
+            get_dremio_user(),
+            get_dremio_password()
         ],
         path_dremio_driver
     )
