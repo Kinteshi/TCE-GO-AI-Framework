@@ -54,7 +54,7 @@ def get_validated_data_path() -> str:
 
 
 def get_label_population_floor() -> int:
-    return PARSER.getint(TRAINING, 'min_documents_class', fallback=2)
+    return PARSER.getint(TRAINING, 'min_documents_class', fallback=200)
 
 
 def get_algorithm() -> str:
