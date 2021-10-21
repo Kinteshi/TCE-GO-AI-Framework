@@ -47,7 +47,7 @@ def evaluation_flow():
     y_true = [1 if analise == 'OK' else 0
               for analise in data.analise.values.tolist()]
     y_pred = [1 if pred == true else 0
-              for pred, true in zip(y_pred_natureza, data.nat_despesa_cod.values.tolist())]
+              for pred, true in zip(y_pred_natureza, data.natureza_despesa_cod.values.tolist())]
 
     report = classification_report(y_true, y_pred, output_dict=True)
     report = DataFrame(report).transpose()
