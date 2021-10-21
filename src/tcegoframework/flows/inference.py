@@ -3,7 +3,6 @@ import warnings
 from datetime import datetime
 from functools import partial
 
-import tcegoframework.config as config
 from numpy import array
 from pandas.core.frame import DataFrame
 from tcegoframework.cfgparsing import get_algorithm, get_inference_dataset_path

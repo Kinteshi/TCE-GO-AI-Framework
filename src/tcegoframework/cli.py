@@ -4,6 +4,7 @@ import sys
 from dateutil.parser import parse
 
 from tcegoframework import config
+from tcegoframework.flows.evaluation import evaluation_flow
 
 
 def parseb(date: str):
@@ -17,12 +18,13 @@ parser = argparse.ArgumentParser(prog='tcegoframework')
 parser.add_argument(
     'task',
     action='store',
-    choices=['training', 'inference'],
+    choices=['training', 'inference', 'evaluation'],
     type=str,
     help='''
         Tarefa: obrigatório. Seleciona a tarefa a ser executada.
-        \'training\' treina o modelo com todos os dados disponíveis até o dia anterior.
+        \'training\' Treina o modelo com todos os dados disponíveis até o dia anterior.
         \'inference\' Realiza inferência nos empenhos do dia anterior por padrão (para mais opções de filtro veja outros parâmetros).
+        \'evaluation\' Avalia os algoritmos 
         '''
 )
 
@@ -84,4 +86,7 @@ def main():
             filters['orgaos'] = args.orgaos
         from tcegoframework.flows.inference import inference_flow
         inference_flow(filters)
+        sys.exit(0)
+    elif args.task == 'evaluation':
+        evaluation_flow()
         sys.exit(0)
