@@ -39,18 +39,19 @@ def evaluation_flow():
     elif get_algorithm() == 'bert_rf':
         inference_natureza = partial(inference_bert_rf_natureza)
 
-    print('Inferência de Natureza...')
-    time_ref = time.time()
-    y_pred_natureza = inference_natureza(data.copy())
-    print(f'Duração total: {(time.time() - time_ref)/60}')
+    for label in ['OK', 'INCONCLUSIVO', 'INCORRETO']:
+        temp_data = data.loc[data.analise == label]
 
-    y_true = [1 if analise == 'OK' else 0
-              for analise in data.analise.values.tolist()]
-    y_pred = [1 if pred == true else 0
-              for pred, true in zip(y_pred_natureza, data.natureza_despesa_cod.values.tolist())]
+        print(f'Inferência de Natureza para documentos {label}...')
+        time_ref = time.time()
+        y_pred_natureza = inference_natureza(temp_data.copy())
 
-    report = classification_report(y_true, y_pred, output_dict=True)
-    report = DataFrame(report).transpose()
-    report.to_csv('eval_report.csv')
+        y_true = temp_data.natureza_despesa_cod
+
+        report = classification_report(
+            y_true, y_pred_natureza, output_dict=True)
+        report = DataFrame(report).transpose()
+        report.to_csv(f'{label}_eval_report.csv')
+        print(f'Duração total: {(time.time() - time_ref)/60}')
 
     print('Finalizado.')
