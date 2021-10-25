@@ -1,8 +1,6 @@
-import gc
 import time
 import warnings
 from functools import partial
-from typing import Union
 
 import tcegoframework.config as config
 from pandas.core.frame import DataFrame

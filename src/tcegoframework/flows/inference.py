@@ -3,7 +3,6 @@ import warnings
 from datetime import datetime
 from functools import partial
 
-import tcegoframework.config as config
 from numpy import array
 from pandas.core.frame import DataFrame
 from tcegoframework.cfgparsing import get_algorithm, get_inference_dataset_path
@@ -33,6 +32,7 @@ def create_inference_dict(data: DataFrame) -> dict:
             'Natureza Real': empenho['natureza_despesa_cod'],
             'Natureza Predita': None,
             'Corretude': None,
+            'Data Predicao': datetime.now().strftime('%d/%m/%Y'),
             'Resultado': None,
         }
     return inference_dict

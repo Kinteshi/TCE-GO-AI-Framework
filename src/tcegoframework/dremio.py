@@ -4,7 +4,6 @@ import jaydebeapi
 from pandas import DataFrame
 from pkg_resources import resource_filename
 
-import tcegoframework.config as config
 from tcegoframework.cfgparsing import (get_dremio_connection,
                                        get_dremio_password, get_dremio_user)
 
