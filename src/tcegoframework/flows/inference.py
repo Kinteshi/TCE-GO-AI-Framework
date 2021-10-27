@@ -165,6 +165,26 @@ def get_dataset(filters: dict) -> DataFrame:
         data = query_dataset(filters)
     return data
 
+# define function to parse daterange, date and orgaos filters into filename
+
+
+def parse_filters(filters: dict) -> str:
+    filename = 'inference' + datetime.today().strftime('%d-%m-%Y')
+    if 'daterange' in filters:
+        start_date, end_date = filters['daterange']
+        start_date = start_date.replace('/', '-')
+        end_date = end_date.replace('/', '-')
+        filename += f'_DR{start_date}-{end_date}'
+    if 'dates' in filters:
+        dates = filters['dates']
+        dates = '-'.join(dates).replace('/', '-')
+        filename += f'_D{dates}'
+    if 'organs' in filters:
+        orgaos = filters['orgaos']
+        orgaos = '-'.join(orgaos).replace('/', '')
+        filename += f'_O{orgaos}'
+    return filename
+
 
 def inference_flow(filters: dict):
     # Executing query
@@ -202,8 +222,8 @@ def inference_flow(filters: dict):
     inference_dict = compute_output(
         data, inference_dict, y_pred_natureza, y_pred_corretude)
 
-    date = datetime.today().strftime('%d-%m-%Y')
+    filename = parse_filters(filters)
 
-    results = save_inference_results(f'{date}_results.csv', inference_dict)
-    save_inference_plot(f'{date}_results_plot.png', results)
+    results = save_inference_results(filename, inference_dict)
+    save_inference_plot(f'{filename}_plot.png', results)
     print('Finalizado.')
