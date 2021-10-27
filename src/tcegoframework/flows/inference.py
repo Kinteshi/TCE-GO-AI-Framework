@@ -222,7 +222,7 @@ def inference_flow(filters: dict):
     inference_dict = compute_output(
         data, inference_dict, y_pred_natureza, y_pred_corretude)
 
-    filename = parse_filters(filters)
+    filename = parse_filters(filters) + '.csv'
 
     results = save_inference_results(filename, inference_dict)
     save_inference_plot(f'{filename}_plot.png', results)
