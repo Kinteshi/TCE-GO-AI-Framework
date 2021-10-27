@@ -172,12 +172,13 @@ def parse_filters(filters: dict) -> str:
     filename = 'inference' + datetime.today().strftime('%d-%m-%Y')
     if 'daterange' in filters:
         start_date, end_date = filters['daterange']
-        start_date = start_date.replace('/', '-')
-        end_date = end_date.replace('/', '-')
+        start_date = start_date.strftime('%d-%m-%Y')
+        end_date = end_date.strftime('%d-%m-%Y')
         filename += f'_DR{start_date}-{end_date}'
     if 'dates' in filters:
         dates = filters['dates']
-        dates = '-'.join(dates).replace('/', '-')
+        dates = [date.strftime('%d-%m-%Y') for date in dates]
+        dates = '-'.join(dates)
         filename += f'_D{dates}'
     if 'organs' in filters:
         orgaos = filters['orgaos']
