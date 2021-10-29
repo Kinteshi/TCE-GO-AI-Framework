@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import sys
 
 import jaydebeapi
 from pandas import DataFrame
@@ -84,8 +85,11 @@ def execute_query(query):
         cursor.fetchall(),
         columns=[i[0] for i in cursor.description]
     )
+    if data.empty:
+        print('Nenhum registro encontrado para o filtro especificado.')
+        print('Fim da execução.')
+        sys.exit(1)
     conn.close()
-    print(data.shape)
     return data
 
 
