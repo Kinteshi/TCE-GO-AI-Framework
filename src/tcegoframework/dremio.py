@@ -85,6 +85,7 @@ def execute_query(query):
         columns=[i[0] for i in cursor.description]
     )
     conn.close()
+    print(data.shape)
     return data
 
 
