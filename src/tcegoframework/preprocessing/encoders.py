@@ -162,6 +162,28 @@ def encode_train_test(X_train: DataFrame, X_test: DataFrame, numerical_columns: 
     return X_train, X_test
 
 
+def encode_AD(
+        X: DataFrame,
+        numerical_columns: list,
+        categorical_columns: list,
+        text_columns: list,
+        prefix: str) -> DataFrame:
+    X = X.reset_index(drop=True)
+
+    if 'empenho_numero_do_processo' in categorical_columns:
+        X = generate_fit_process_count(X)
+        categorical_columns.remove('empenho_numero_do_processo')
+        numerical_columns.append('empenhos_por_processo')
+
+    X = generate_fit_scaler(X, numerical_columns, prefix)
+
+    X = generate_fit_ohe(X, categorical_columns, prefix)
+
+    X = generate_fit_tfidf(X, text_columns, prefix)
+
+    return X
+
+
 def encode_inference(X, y, numerical_columns: list, categorical_columns: list, text_columns: list, prefix: str,
                      text_representation: str, section: str = None) -> DataFrame:
     X = X.reset_index(drop=True)
