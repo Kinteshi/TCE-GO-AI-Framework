@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from pandas import DataFrame
 from pandas.core.series import Series
+from scipy.sparse import csr_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from tcegoframework import config
@@ -16,7 +17,7 @@ from transformers import BertTokenizer
 
 
 def preprocessing_training_natureza(data: DataFrame, text_representation: str, section: str) -> tuple[
-        DataFrame, DataFrame, Series, Series]:
+        csr_matrix, csr_matrix, Series, Series]:
     target = data.natureza_despesa_cod
 
     cat_col = config.CLF_CAT.copy()
@@ -166,7 +167,7 @@ def preprocessing_inference_natureza_bert(data: DataFrame, section: str) -> data
     return dataloader
 
 
-def preprocessing_training_corretude(data: DataFrame) -> tuple[DataFrame, DataFrame, Series, Series]:
+def preprocessing_training_corretude(data: DataFrame) -> tuple[csr_matrix, csr_matrix, Series, Series]:
     target = data.analise
 
     data = data.loc[:, (*config.CLF2_CAT,
@@ -194,7 +195,7 @@ def preprocessing_training_corretude(data: DataFrame) -> tuple[DataFrame, DataFr
     return X_train, X_test, y_train, y_test
 
 
-def preprocessing_inference_corretude(data: DataFrame) -> DataFrame:
+def preprocessing_inference_corretude(data: DataFrame) -> csr_matrix:
     data = data.loc[:, (*config.CLF2_CAT,
                         *config.CLF2_TEXT,
                         *config.CLF2_NUM,)]

@@ -29,7 +29,7 @@ def generate_scaler(X_test, columns, prefix='') -> List[array]:
     out = []
     for col_name in columns:
         scaler = load_encoder(f'{prefix}_sc_{col_name}.pkl')
-        scaled = scaler.fit_transform(X_test[col_name].values.reshape(-1, 1))
+        scaled = scaler.transform(X_test[col_name].values.reshape(-1, 1))
         out.append(scaled)
     return out
 
