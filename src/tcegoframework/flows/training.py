@@ -283,6 +283,4 @@ def train_flow(filters: dict):
     print(
         f'Treinamento finalizado. Duração total: {(time.time() - time_ref)/60}')
 
-    training_evaluation_flow()
-
     print('Script de treinamento finalizado')

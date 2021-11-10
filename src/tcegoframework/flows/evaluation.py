@@ -16,19 +16,6 @@ from tcegoframework.model.metrics import classification_report_csv
 from tcegoframework.preprocessing.text import regularize_columns_name
 
 
-def compute_agreement(y_true, y_pred) -> str:
-    if y_true == y_pred:
-        return 'OK'
-    else:
-        return 'INCONCLUSIVO'
-
-
-def compute_output(data: DataFrame, inference_dict: dict, y_natureza: array, y_corretude: array) -> dict:
-    for i in range(data.shape[0]):
-        pass
-    return inference_dict
-
-
 def evaluation_flow():
     # Executing query
     print('Preparando e executando avaliação...')
@@ -93,7 +80,7 @@ def training_evaluation_flow():
         y_true = temp_data.natureza_despesa_cod
 
         classification_report_csv(
-            y_true, y_pred_natureza, f'{label}_eval_report.csv')
+            y_true, y_pred_natureza, False, f'natureza_{label}_eval_report.csv')
         print(f'Duração total: {(time.time() - time_ref)/60}')
 
     print('Avaliação do classificador de corretude...')
@@ -101,7 +88,7 @@ def training_evaluation_flow():
     y_pred = inference_corretude(data.copy())
     y_true = data.analise
     classification_report_csv(
-        y_true, y_pred, 'corretude_eval_report.csv')
+        y_true, y_pred, False, 'corretude_eval_report.csv')
     print(f'Duração total: {(time.time() - time_ref)/60}')
 
     print('Finalizado.')

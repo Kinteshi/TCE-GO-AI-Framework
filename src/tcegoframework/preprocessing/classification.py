@@ -110,14 +110,14 @@ def preprocessing_inference_natureza(data: DataFrame, text_representation: str, 
                         *num_col,)]
 
     data, categorical_columns, numerical_columns = data_preparation(
-        data, categorical_columns=cat_col, numerical_columns=config.CLF_NUM, )
+        data, categorical_columns=cat_col, numerical_columns=num_col, )
 
     X = encode_inference(
         data,
         target,
         numerical_columns,
         categorical_columns,
-        config.CLF_TEXT,
+        text_col,
         prefix=f'nat_{section}',
         text_representation=text_representation,
         section=section)
@@ -170,14 +170,18 @@ def preprocessing_inference_natureza_bert(data: DataFrame, section: str) -> data
 def preprocessing_training_corretude(data: DataFrame) -> tuple[csr_matrix, csr_matrix, Series, Series]:
     target = data.analise
 
-    data = data.loc[:, (*config.CLF2_CAT,
-                        *config.CLF2_TEXT,
-                        *config.CLF2_NUM,)]
+    cat_col = deepcopy(config.CLF2_CAT)
+    num_col = deepcopy(config.CLF2_NUM)
+    text_col = deepcopy(config.CLF2_TEXT)
+
+    data = data.loc[:, (*cat_col,
+                        *text_col,
+                        *num_col,)]
 
     data, categorical_columns, numerical_columns = data_preparation(
         data,
-        categorical_columns=config.CLF2_CAT,
-        numerical_columns=config.CLF2_NUM, )
+        categorical_columns=cat_col,
+        numerical_columns=num_col,)
 
     X_train, X_test, y_train, y_test = train_test_split(
         data, target, test_size=0.2, random_state=config.RANDOM_SEED, stratify=target)
@@ -186,7 +190,7 @@ def preprocessing_training_corretude(data: DataFrame) -> tuple[csr_matrix, csr_m
                                         X_test,
                                         numerical_columns,
                                         categorical_columns,
-                                        config.CLF2_TEXT,
+                                        text_col,
                                         y_train=y_train,
                                         y_test=y_test,
                                         prefix='cr',
@@ -196,21 +200,26 @@ def preprocessing_training_corretude(data: DataFrame) -> tuple[csr_matrix, csr_m
 
 
 def preprocessing_inference_corretude(data: DataFrame) -> csr_matrix:
-    data = data.loc[:, (*config.CLF2_CAT,
-                        *config.CLF2_TEXT,
-                        *config.CLF2_NUM,)]
+
+    cat_col = deepcopy(config.CLF2_CAT)
+    num_col = deepcopy(config.CLF2_NUM)
+    text_col = deepcopy(config.CLF2_TEXT)
+
+    data = data.loc[:, (*cat_col,
+                        *text_col,
+                        *num_col,)]
 
     data, categorical_columns, numerical_columns = data_preparation(
         data,
-        categorical_columns=config.CLF2_CAT,
-        numerical_columns=config.CLF2_NUM, )
+        categorical_columns=cat_col,
+        numerical_columns=num_col, )
 
     X = encode_inference(
         data,
         None,
         numerical_columns,
         categorical_columns,
-        config.CLF2_TEXT,
+        text_col,
         prefix='cr',
         text_representation='tfidf')
 
