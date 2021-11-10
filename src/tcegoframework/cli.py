@@ -4,7 +4,7 @@ import sys
 from dateutil.parser import parse
 
 from tcegoframework import config
-from tcegoframework.flows.evaluation import evaluation_flow
+from tcegoframework.flows.evaluation import evaluation_flow, training_evaluation_flow
 
 
 def parseb(date: str):
@@ -89,4 +89,5 @@ def main():
         sys.exit(0)
     elif args.task == 'evaluation':
         evaluation_flow()
+        training_evaluation_flow()
         sys.exit(0)

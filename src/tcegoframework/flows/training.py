@@ -20,6 +20,7 @@ from tcegoframework.data.filter import (change_scope_dict, create_scope_dict,
                                         where_zero_value)
 from tcegoframework.dremio import (construct_query, execute_query,
                                    get_train_data)
+from tcegoframework.flows.evaluation import training_evaluation_flow
 from tcegoframework.io import (dump_model, load_csv_data, load_encoder,
                                load_excel_data, load_torch_model,
                                save_bert_history_plot, save_scope_dict)
@@ -281,4 +282,5 @@ def train_flow(filters: dict):
     train_corretude(data.copy())
     print(
         f'Treinamento finalizado. Duração total: {(time.time() - time_ref)/60}')
+
     print('Script de treinamento finalizado')
