@@ -10,7 +10,7 @@ import seaborn as sns
 from pandas import DataFrame, read_csv, read_excel
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from torch import device, load, save
+from torch import load, save
 
 import tcegoframework.config as config
 from tcegoframework.cfgparsing import (get_hdfs_dir_path, get_hdfs_domain,

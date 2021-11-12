@@ -18,13 +18,14 @@ parser = argparse.ArgumentParser(prog='tcegoframework')
 parser.add_argument(
     'task',
     action='store',
-    choices=['training', 'inference', 'evaluation'],
+    choices=['training', 'inference', 'evaluation', 'extraction'],
     type=str,
     help='''
         Tarefa: obrigatório. Seleciona a tarefa a ser executada.
         \'training\' Treina o modelo com todos os dados disponíveis até o dia anterior.
         \'inference\' Realiza inferência nos empenhos do dia anterior por padrão (para mais opções de filtro veja outros parâmetros).
-        \'evaluation\' Avalia os algoritmos 
+        \'evaluation\' Avalia os algoritmos com os dados analisados.
+        \'extraction\' Extrai a base de dados atualizada até o dia anterior.
         '''
 )
 
@@ -90,4 +91,10 @@ def main():
     elif args.task == 'evaluation':
         evaluation_flow()
         training_evaluation_flow()
+        sys.exit(0)
+    elif args.task == 'extraction':
+        if args.daterange:
+            filters['daterange'] = args.daterange
+        from tcegoframework.flows.extraction import extraction_flow
+        extraction_flow(filters)
         sys.exit(0)

@@ -1,7 +1,6 @@
 from functools import partial
 from typing import Iterable
 
-import tcegoframework.config as config
 from pandas import DataFrame
 from pandas.core import series
 
